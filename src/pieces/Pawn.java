@@ -69,7 +69,19 @@ public class Pawn extends Pieces {
 				newBoard[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
 				return newBoard;
-			}	
+			} else if ((toIndexI == lastIndexI - 1) && ((toIndexJ == lastIndexJ + 1) || (toIndexJ == lastIndexJ - 1))) {
+				if ((oldBoard[toIndexI][toIndexJ] == null) || (oldBoard[lastIndexI][lastIndexJ].getColour() == oldBoard[toIndexI][toIndexJ].getColour())) {
+					
+					return oldBoard;
+					
+				}
+				Pieces[][] newBoard = oldBoard;
+				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+				printPiece(b.get(toIndexI * 8 + toIndexJ));
+				newBoard[lastIndexI][lastIndexJ] = null;
+				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				return newBoard;
+			}	 
 		} else if (oldBoard[lastIndexI][lastIndexJ].isWhite) {
 			
 			if ((toIndexI == lastIndexI - 1) && (toIndexJ == lastIndexJ)) {
@@ -85,7 +97,19 @@ public class Pawn extends Pieces {
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
 				return newBoard;
 				
-			}	
+			} else if ((toIndexI == lastIndexI - 1) && ((toIndexJ == lastIndexJ + 1) || (toIndexJ == lastIndexJ - 1))) {
+				if ((oldBoard[toIndexI][toIndexJ] == null) || (oldBoard[lastIndexI][lastIndexJ].getColour() == oldBoard[toIndexI][toIndexJ].getColour())) {
+					
+					return oldBoard;
+					
+				}
+				Pieces[][] newBoard = oldBoard;
+				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+				printPiece(b.get(toIndexI * 8 + toIndexJ));
+				newBoard[lastIndexI][lastIndexJ] = null;
+				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				return newBoard;
+			}
 		} else if (Arrays.asList(oldBoard[Ranks.RANK7.ordinal()]).contains(oldBoard[lastIndexI][lastIndexJ]) && !oldBoard[lastIndexI][lastIndexJ].isWhite) {
 			if (((toIndexI == lastIndexI + 1) && (toIndexJ == lastIndexJ)) || ((toIndexI == lastIndexI + 2) && (toIndexJ == lastIndexJ))) {
 				if ((toIndexI == lastIndexI + 1) && (toIndexJ == lastIndexJ)) {
@@ -108,6 +132,18 @@ public class Pawn extends Pieces {
 				newBoard[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
 				return newBoard;
+			} else if ((toIndexI == lastIndexI + 1) && ((toIndexJ == lastIndexJ + 1) || (toIndexJ == lastIndexJ - 1))) {
+				if ((oldBoard[toIndexI][toIndexJ] == null) || (oldBoard[lastIndexI][lastIndexJ].getColour() == oldBoard[toIndexI][toIndexJ].getColour())) {
+					
+					return oldBoard;
+					
+				}
+				Pieces[][] newBoard = oldBoard;
+				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+				printPiece(b.get(toIndexI * 8 + toIndexJ));
+				newBoard[lastIndexI][lastIndexJ] = null;
+				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				return newBoard;
 			}	
 		} else if (!oldBoard[lastIndexI][lastIndexJ].isWhite) {
 			
@@ -124,6 +160,18 @@ public class Pawn extends Pieces {
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
 				return newBoard;
 				
+			} else if ((toIndexI == lastIndexI + 1) && ((toIndexJ == lastIndexJ + 1) || (toIndexJ == lastIndexJ - 1))) {
+				if ((oldBoard[toIndexI][toIndexJ] == null) || (oldBoard[lastIndexI][lastIndexJ].getColour() == oldBoard[toIndexI][toIndexJ].getColour())) {
+					
+					return oldBoard;
+					
+				}
+				Pieces[][] newBoard = oldBoard;
+				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+				printPiece(b.get(toIndexI * 8 + toIndexJ));
+				newBoard[lastIndexI][lastIndexJ] = null;
+				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				return newBoard;
 			}
 		}
 		//row * 8 + col

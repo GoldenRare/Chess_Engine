@@ -195,7 +195,6 @@ public class GameBoard_GUI implements ActionListener{
  */
 
 /*
- * Fix Pawn movements
  * Make sure all captures are working 
  * Work on Special movements:
  * 	ex. Castling, En Passant, Pawn Promotions, etc.
