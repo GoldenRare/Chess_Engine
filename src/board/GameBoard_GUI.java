@@ -133,7 +133,14 @@ public class GameBoard_GUI implements ActionListener{
 		*/
 		if (this.flag) {
 			
-			this.board = this.board[this.lastIndexI][this.lastIndexJ].makeMove(this.lastIndexI, this.lastIndexJ, toIndexI, toIndexJ, this.board, this.squares);
+			try {
+				
+				this.board = this.board[this.lastIndexI][this.lastIndexJ].makeMove(this.lastIndexI, this.lastIndexJ, toIndexI, toIndexJ, this.board, this.squares);
+				
+			} catch (NullPointerException e) {
+				
+				System.out.println("Invalid Move!");
+			}
 			//updateBoard(this.board);
 			//System.out.print(Arrays.deepToString(this.board).replace("], ", "]\n"));
 			

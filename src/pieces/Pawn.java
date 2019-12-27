@@ -73,7 +73,11 @@ public class Pawn extends Pieces {
 		} else if (oldBoard[lastIndexI][lastIndexJ].isWhite) {
 			
 			if ((toIndexI == lastIndexI - 1) && (toIndexJ == lastIndexJ)) {
-				
+				if (oldBoard[toIndexI][toIndexJ] != null) {
+					
+					return oldBoard;
+					
+				}
 				Pieces[][] newBoard = oldBoard;
 				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
@@ -108,7 +112,11 @@ public class Pawn extends Pieces {
 		} else if (!oldBoard[lastIndexI][lastIndexJ].isWhite) {
 			
 			if ((toIndexI == lastIndexI + 1) && (toIndexJ == lastIndexJ)) {
-				
+				if (oldBoard[toIndexI][toIndexJ] != null) {
+					
+					return oldBoard;
+					
+				}
 				Pieces[][] newBoard = oldBoard;
 				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
