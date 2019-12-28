@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.swing.JButton;
 
+import board.GameBoard;
+
 public abstract class Pieces {
 
 	protected boolean isWhite; 
@@ -21,12 +23,12 @@ public abstract class Pieces {
 	}
 	
 	public abstract void printPiece(JButton b);
-	public Pieces[][] makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, Pieces[][] oldBoard, List<JButton> b){
+	public GameBoard makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, List<JButton> b){
 		
-		Pieces[][] newBoard = oldBoard;
-		newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+		GameBoard newBoard = oldBoard;
+		newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 		printPiece(b.get(toIndexI * 8 + toIndexJ));
-		newBoard[lastIndexI][lastIndexJ] = null;
+		newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 		b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
 		
 		//row * 8 + col

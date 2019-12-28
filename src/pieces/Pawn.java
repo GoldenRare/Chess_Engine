@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
+import board.GameBoard;
 import board_indexing.Ranks;
 
 public class Pawn extends Pieces {
@@ -38,139 +39,155 @@ public class Pawn extends Pieces {
 		}
 	}
 	
-	public Pieces[][] makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, Pieces[][] oldBoard, List<JButton> b) {
+	public GameBoard makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, List<JButton> b) {
 		// Current implementation will make pawn go straight through opposing pawn
 		// Account for captures, they can also occur on home rank
-		if ((oldBoard[toIndexI][toIndexJ] != null) && (oldBoard[lastIndexI][lastIndexJ].getColour() == oldBoard[toIndexI][toIndexJ].getColour())) {
+		if ((oldBoard.getBoard()[toIndexI][toIndexJ] != null) && (oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour() == oldBoard.getBoard()[toIndexI][toIndexJ].getColour())) {
 			
 			return oldBoard;
 			
 		}
 
-		if (Arrays.asList(oldBoard[Ranks.RANK2.ordinal()]).contains(oldBoard[lastIndexI][lastIndexJ]) && oldBoard[lastIndexI][lastIndexJ].isWhite) {
+		if (Arrays.asList(oldBoard.getBoard()[Ranks.RANK2.ordinal()]).contains(oldBoard.getBoard()[lastIndexI][lastIndexJ]) && oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
 			if (((toIndexI == lastIndexI - 1) && (toIndexJ == lastIndexJ)) || ((toIndexI == lastIndexI - 2) && (toIndexJ == lastIndexJ))) {
 				if ((toIndexI == lastIndexI - 1) && (toIndexJ == lastIndexJ)) {
-					if (oldBoard[toIndexI][toIndexJ] != null) {
+					if (oldBoard.getBoard()[toIndexI][toIndexJ] != null) {
 						
 						return oldBoard;
 						
 					}
 				} else if ((toIndexI == lastIndexI - 2) && (toIndexJ == lastIndexJ)) {
-					if ((oldBoard[toIndexI][toIndexJ] != null) || (oldBoard[toIndexI + 1][toIndexJ] != null)) {
+					if ((oldBoard.getBoard()[toIndexI][toIndexJ] != null) || (oldBoard.getBoard()[toIndexI + 1][toIndexJ] != null)) {
 						
 						return oldBoard;
 						
 					}
 				}
 				
-				Pieces[][] newBoard = oldBoard;
-				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
-				newBoard[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				
+				//row * 8 + col
 				return newBoard;
 			} else if ((toIndexI == lastIndexI - 1) && ((toIndexJ == lastIndexJ + 1) || (toIndexJ == lastIndexJ - 1))) {
-				if ((oldBoard[toIndexI][toIndexJ] == null) || (oldBoard[lastIndexI][lastIndexJ].getColour() == oldBoard[toIndexI][toIndexJ].getColour())) {
+				if ((oldBoard.getBoard()[toIndexI][toIndexJ] == null) || (oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour() == oldBoard.getBoard()[toIndexI][toIndexJ].getColour())) {
 					
 					return oldBoard;
 					
 				}
-				Pieces[][] newBoard = oldBoard;
-				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
-				newBoard[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				
+				//row * 8 + col
 				return newBoard;
 			}	 
-		} else if (oldBoard[lastIndexI][lastIndexJ].isWhite) {
+		} else if (oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
 			
 			if ((toIndexI == lastIndexI - 1) && (toIndexJ == lastIndexJ)) {
-				if (oldBoard[toIndexI][toIndexJ] != null) {
+				if (oldBoard.getBoard()[toIndexI][toIndexJ] != null) {
 					
 					return oldBoard;
 					
 				}
-				Pieces[][] newBoard = oldBoard;
-				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
-				newBoard[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				
+				//row * 8 + col
 				return newBoard;
 				
 			} else if ((toIndexI == lastIndexI - 1) && ((toIndexJ == lastIndexJ + 1) || (toIndexJ == lastIndexJ - 1))) {
-				if ((oldBoard[toIndexI][toIndexJ] == null) || (oldBoard[lastIndexI][lastIndexJ].getColour() == oldBoard[toIndexI][toIndexJ].getColour())) {
+				if ((oldBoard.getBoard()[toIndexI][toIndexJ] == null) || (oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour() == oldBoard.getBoard()[toIndexI][toIndexJ].getColour())) {
 					
 					return oldBoard;
 					
 				}
-				Pieces[][] newBoard = oldBoard;
-				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
-				newBoard[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				
+				//row * 8 + col
 				return newBoard;
 			}
-		} else if (Arrays.asList(oldBoard[Ranks.RANK7.ordinal()]).contains(oldBoard[lastIndexI][lastIndexJ]) && !oldBoard[lastIndexI][lastIndexJ].isWhite) {
+		} else if (Arrays.asList(oldBoard.getBoard()[Ranks.RANK7.ordinal()]).contains(oldBoard.getBoard()[lastIndexI][lastIndexJ]) && !oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
 			if (((toIndexI == lastIndexI + 1) && (toIndexJ == lastIndexJ)) || ((toIndexI == lastIndexI + 2) && (toIndexJ == lastIndexJ))) {
 				if ((toIndexI == lastIndexI + 1) && (toIndexJ == lastIndexJ)) {
-					if (oldBoard[toIndexI][toIndexJ] != null) {
+					if (oldBoard.getBoard()[toIndexI][toIndexJ] != null) {
 						
 						return oldBoard;
 						
 					}
 				} else if ((toIndexI == lastIndexI + 2) && (toIndexJ == lastIndexJ)) {
-					if ((oldBoard[toIndexI][toIndexJ] != null) || (oldBoard[toIndexI - 1][toIndexJ] != null)) {
+					if ((oldBoard.getBoard()[toIndexI][toIndexJ] != null) || (oldBoard.getBoard()[toIndexI - 1][toIndexJ] != null)) {
 						
 						return oldBoard;
 						
 					}
 				}
 				
-				Pieces[][] newBoard = oldBoard;
-				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
-				newBoard[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				
+				//row * 8 + col
 				return newBoard;
 			} else if ((toIndexI == lastIndexI + 1) && ((toIndexJ == lastIndexJ + 1) || (toIndexJ == lastIndexJ - 1))) {
-				if ((oldBoard[toIndexI][toIndexJ] == null) || (oldBoard[lastIndexI][lastIndexJ].getColour() == oldBoard[toIndexI][toIndexJ].getColour())) {
+				if ((oldBoard.getBoard()[toIndexI][toIndexJ] == null) || (oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour() == oldBoard.getBoard()[toIndexI][toIndexJ].getColour())) {
 					
 					return oldBoard;
 					
 				}
-				Pieces[][] newBoard = oldBoard;
-				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
-				newBoard[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				
+				//row * 8 + col
 				return newBoard;
 			}	
-		} else if (!oldBoard[lastIndexI][lastIndexJ].isWhite) {
+		} else if (!oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
 			
 			if ((toIndexI == lastIndexI + 1) && (toIndexJ == lastIndexJ)) {
-				if (oldBoard[toIndexI][toIndexJ] != null) {
+				if (oldBoard.getBoard()[toIndexI][toIndexJ] != null) {
 					
 					return oldBoard;
 					
 				}
-				Pieces[][] newBoard = oldBoard;
-				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
-				newBoard[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				
+				//row * 8 + col
 				return newBoard;
 				
 			} else if ((toIndexI == lastIndexI + 1) && ((toIndexJ == lastIndexJ + 1) || (toIndexJ == lastIndexJ - 1))) {
-				if ((oldBoard[toIndexI][toIndexJ] == null) || (oldBoard[lastIndexI][lastIndexJ].getColour() == oldBoard[toIndexI][toIndexJ].getColour())) {
+				if ((oldBoard.getBoard()[toIndexI][toIndexJ] == null) || (oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour() == oldBoard.getBoard()[toIndexI][toIndexJ].getColour())) {
 					
 					return oldBoard;
 					
 				}
-				Pieces[][] newBoard = oldBoard;
-				newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
-				newBoard[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				
+				//row * 8 + col
 				return newBoard;
 			}
 		}

@@ -6,6 +6,8 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
+import board.GameBoard;
+
 public class Knight extends Pieces {
 
 	public double value = 10; //Unsure
@@ -36,11 +38,11 @@ public class Knight extends Pieces {
 		
 	}
 	
-	public Pieces[][] makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, Pieces[][] oldBoard, List<JButton> b) {
+	public GameBoard makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, List<JButton> b) {
 		// Consider adding new function for this
 		// Consider bitboards
 		// DOES MOVE LEAVE KING IN CHECK
-		if ((oldBoard[toIndexI][toIndexJ] != null) && (oldBoard[lastIndexI][lastIndexJ].getColour() == oldBoard[toIndexI][toIndexJ].getColour())) {
+		if ((oldBoard.getBoard()[toIndexI][toIndexJ] != null) && (oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour() == oldBoard.getBoard()[toIndexI][toIndexJ].getColour())) {
 			
 			return oldBoard;
 			
@@ -51,11 +53,13 @@ public class Knight extends Pieces {
 		
 		if (magnitudeOfMove == knightMagnitude) {
 			
-			Pieces[][] newBoard = oldBoard;
-			newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+			GameBoard newBoard = oldBoard;
+			newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 			printPiece(b.get(toIndexI * 8 + toIndexJ));
-			newBoard[lastIndexI][lastIndexJ] = null;
+			newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 			b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+			
+			//row * 8 + col
 			return newBoard;
 			
 		}

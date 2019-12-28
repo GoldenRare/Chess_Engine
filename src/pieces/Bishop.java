@@ -6,6 +6,8 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
+import board.GameBoard;
+
 public class Bishop extends Pieces {
 
 	public double value = 10; //Unsure
@@ -37,9 +39,9 @@ public class Bishop extends Pieces {
 		
 	}
 	
-	public Pieces[][] makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, Pieces[][] oldBoard, List<JButton> b) {
+	public GameBoard makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, List<JButton> b) {
 		
-		if ((oldBoard[toIndexI][toIndexJ] != null) && (oldBoard[lastIndexI][lastIndexJ].getColour() == oldBoard[toIndexI][toIndexJ].getColour())) {
+		if ((oldBoard.getBoard()[toIndexI][toIndexJ] != null) && (oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour() == oldBoard.getBoard()[toIndexI][toIndexJ].getColour())) {
 			
 			return oldBoard;
 			
@@ -58,7 +60,7 @@ public class Bishop extends Pieces {
 				int y = lastIndexJ - 1;
 				for (int i = 0; i < checkSquares; i++) {
 					
-					if(oldBoard[x][y] != null) {
+					if(oldBoard.getBoard()[x][y] != null) {
 						
 						return oldBoard;
 						
@@ -73,7 +75,7 @@ public class Bishop extends Pieces {
 				int y = lastIndexJ + 1;
 				for (int i = 0; i < checkSquares; i++) {
 					
-					if(oldBoard[x][y] != null) {
+					if(oldBoard.getBoard()[x][y] != null) {
 						
 						return oldBoard;
 						
@@ -88,7 +90,7 @@ public class Bishop extends Pieces {
 				int y = lastIndexJ + 1;
 				for (int i = 0; i < checkSquares; i++) {
 					
-					if(oldBoard[x][y] != null) {
+					if(oldBoard.getBoard()[x][y] != null) {
 						
 						return oldBoard;
 						
@@ -104,7 +106,7 @@ public class Bishop extends Pieces {
 				int y = lastIndexJ - 1;
 				for (int i = 0; i < checkSquares; i++) {
 					
-					if(oldBoard[x][y] != null) {
+					if(oldBoard.getBoard()[x][y] != null) {
 						
 						return oldBoard;
 						
@@ -114,11 +116,13 @@ public class Bishop extends Pieces {
 				}
 			}
 			
-			Pieces[][] newBoard = oldBoard;
-			newBoard[toIndexI][toIndexJ] = newBoard[lastIndexI][lastIndexJ];
+			GameBoard newBoard = oldBoard;
+			newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 			printPiece(b.get(toIndexI * 8 + toIndexJ));
-			newBoard[lastIndexI][lastIndexJ] = null;
+			newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 			b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+			
+			//row * 8 + col
 			return newBoard;
 			
 		}

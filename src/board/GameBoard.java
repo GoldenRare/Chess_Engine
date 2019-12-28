@@ -13,10 +13,12 @@ import pieces.Rook;
 public class GameBoard {
 	
 	private Pieces[][] board = new Pieces[8][8];
+	private int castlingRights; //Order of the bits: blackKingQueenside, blackKingKingside, whiteKingQueenside, whiteKingKingside
 	
 	public GameBoard() {
 		
 		startGame();
+		this.castlingRights = 0b1111;
 		
 	}
 	
@@ -47,16 +49,28 @@ public class GameBoard {
 		board[0][4] = new King(false);
 		
 		
-		return board;
+		return this.board;
 		
 	}
 	
 	public Pieces[][] getBoard() {
 		
-		return board;
+		return this.board;
 		
 	}
 	
+	public int getCastlingRights() {
+		
+		return this.castlingRights;
+		
+	}
+
+	public void setCastlingRights(int castlingRights) {
+		
+		this.castlingRights = castlingRights;
+		
+	}
+
 	public static void main(String[] args) {
 		
 		GameBoard b = new GameBoard();

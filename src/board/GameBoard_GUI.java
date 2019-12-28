@@ -12,16 +12,13 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
-import pieces.Pieces;
-
 public class GameBoard_GUI implements ActionListener{
 
 	private boolean flag = true;
 	private List<JButton> squares = new ArrayList<JButton>();
-	private Pieces[][] board;
+	private GameBoard board;
 	private int lastIndexI;
 	private int lastIndexJ;
-	//private Pieces toPiece;
 	
 	public GameBoard_GUI() {
 		
@@ -75,7 +72,7 @@ public class GameBoard_GUI implements ActionListener{
 		int x = 100;
 		int y = 100;
 		boolean color = false;
-		this.board = board.getBoard();
+		this.board = board;
 		
 		for(int i = 0; i < 8; i++) {
 			for(int j = 0; j < 8; j++) {
@@ -93,9 +90,9 @@ public class GameBoard_GUI implements ActionListener{
 					
 				}
 				
-				if (this.board[i][j] != null) {
+				if (this.board.getBoard()[i][j] != null) {
 					
-					this.board[i][j].printPiece(b);
+					this.board.getBoard()[i][j].printPiece(b);
 					
 				}
 		
@@ -135,14 +132,14 @@ public class GameBoard_GUI implements ActionListener{
 			
 			try {
 				
-				this.board = this.board[this.lastIndexI][this.lastIndexJ].makeMove(this.lastIndexI, this.lastIndexJ, toIndexI, toIndexJ, this.board, this.squares);
+				this.board = this.board.getBoard()[this.lastIndexI][this.lastIndexJ].makeMove(this.lastIndexI, this.lastIndexJ, toIndexI, toIndexJ, this.board, this.squares);
 				
 			} catch (NullPointerException e) {
 				
 				System.out.println("Invalid Move!");
 			}
 			//updateBoard(this.board);
-			//System.out.print(Arrays.deepToString(this.board).replace("], ", "]\n"));
+			System.out.println(Arrays.deepToString(this.board.getBoard()).replace("], ", "]\n"));
 			
 		}
 		
