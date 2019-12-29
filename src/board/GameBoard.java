@@ -13,12 +13,12 @@ import pieces.Rook;
 public class GameBoard {
 	
 	private Pieces[][] board = new Pieces[8][8];
+	private boolean isWhiteToMove;
 	private int castlingRights; //Order of the bits: blackKingQueenside, blackKingKingside, whiteKingQueenside, whiteKingKingside
 	
 	public GameBoard() {
 		
 		startGame();
-		this.castlingRights = 0b1111;
 		
 	}
 	
@@ -48,6 +48,9 @@ public class GameBoard {
 		board[0][3] = new Queen(false);
 		board[0][4] = new King(false);
 		
+		this.isWhiteToMove = true;
+		this.castlingRights = 0b1111;
+		
 		
 		return this.board;
 		
@@ -59,6 +62,18 @@ public class GameBoard {
 		
 	}
 	
+	public boolean isWhiteToMove() {
+		
+		return this.isWhiteToMove;
+		
+	}
+
+	public void setWhiteToMove(boolean isWhiteToMove) {
+		
+		this.isWhiteToMove = isWhiteToMove;
+		
+	}
+
 	public int getCastlingRights() {
 		
 		return this.castlingRights;

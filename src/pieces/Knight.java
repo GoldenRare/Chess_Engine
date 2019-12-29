@@ -42,6 +42,13 @@ public class Knight extends Pieces {
 		// Consider adding new function for this
 		// Consider bitboards
 		// DOES MOVE LEAVE KING IN CHECK
+		
+		if (oldBoard.isWhiteToMove() != oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour()) {
+			
+			return oldBoard;
+			
+		}
+		
 		if ((oldBoard.getBoard()[toIndexI][toIndexJ] != null) && (oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour() == oldBoard.getBoard()[toIndexI][toIndexJ].getColour())) {
 			
 			return oldBoard;
@@ -58,6 +65,7 @@ public class Knight extends Pieces {
 			printPiece(b.get(toIndexI * 8 + toIndexJ));
 			newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 			b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+			newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 			
 			//row * 8 + col
 			return newBoard;

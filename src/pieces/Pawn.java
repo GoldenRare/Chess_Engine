@@ -42,6 +42,13 @@ public class Pawn extends Pieces {
 	public GameBoard makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, List<JButton> b) {
 		// Current implementation will make pawn go straight through opposing pawn
 		// Account for captures, they can also occur on home rank
+		
+		if (oldBoard.isWhiteToMove() != oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour()) {
+			
+			return oldBoard;
+			
+		}
+		
 		if ((oldBoard.getBoard()[toIndexI][toIndexJ] != null) && (oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour() == oldBoard.getBoard()[toIndexI][toIndexJ].getColour())) {
 			
 			return oldBoard;
@@ -69,6 +76,7 @@ public class Pawn extends Pieces {
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
 				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				
 				//row * 8 + col
 				return newBoard;
@@ -83,6 +91,7 @@ public class Pawn extends Pieces {
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
 				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				
 				//row * 8 + col
 				return newBoard;
@@ -100,6 +109,7 @@ public class Pawn extends Pieces {
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
 				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				
 				//row * 8 + col
 				return newBoard;
@@ -115,6 +125,7 @@ public class Pawn extends Pieces {
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
 				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				
 				//row * 8 + col
 				return newBoard;
@@ -140,6 +151,7 @@ public class Pawn extends Pieces {
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
 				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				
 				//row * 8 + col
 				return newBoard;
@@ -154,6 +166,7 @@ public class Pawn extends Pieces {
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
 				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				
 				//row * 8 + col
 				return newBoard;
@@ -171,6 +184,7 @@ public class Pawn extends Pieces {
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
 				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				
 				//row * 8 + col
 				return newBoard;
@@ -186,6 +200,7 @@ public class Pawn extends Pieces {
 				printPiece(b.get(toIndexI * 8 + toIndexJ));
 				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				
 				//row * 8 + col
 				return newBoard;
