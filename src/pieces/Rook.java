@@ -109,6 +109,19 @@ public class Rook extends Pieces {
 					}
 				}
 			}
+			
+			if (oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
+				if ((lastIndexI == 7) && (lastIndexJ == 7)) {
+					
+					oldBoard.setCastlingRights(oldBoard.getCastlingRights() & 0b1110);
+					
+				} else if ((lastIndexI == 7) && (lastIndexJ == 0)) {
+					
+					oldBoard.setCastlingRights(oldBoard.getCastlingRights() & 0b1101);
+					
+				}
+				
+			}
 			GameBoard newBoard = oldBoard;
 			newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 			printPiece(b.get(toIndexI * 8 + toIndexJ));

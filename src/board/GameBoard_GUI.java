@@ -139,13 +139,14 @@ public class GameBoard_GUI implements ActionListener{
 				System.out.println("Invalid Move!");
 			}
 			//updateBoard(this.board);
-			System.out.println(Arrays.deepToString(this.board.getBoard()).replace("], ", "]\n"));
+			//System.out.println(Arrays.deepToString(this.board.getBoard()).replace("], ", "]\n")); // Debugging
+			System.out.println(this.board.getCastlingRights());
 			
 		}
 		
 		this.lastIndexI = toIndexI;
 		this.lastIndexJ = toIndexJ;
-		System.out.println("[" + toIndexI + "][" + toIndexJ + "]");
+		System.out.println("[" + toIndexI + "][" + toIndexJ + "]"); //Debugging
 		
 	}
 	

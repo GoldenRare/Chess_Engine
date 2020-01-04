@@ -40,7 +40,9 @@ public class King extends Pieces {
 	public GameBoard makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, List<JButton> b) {
 		
 		// Consider adding new function for this
-		//Consider bitboards
+		// Consider bitboards
+		// If castle is correct, castle does not turn off until next king move
+		// Can currently castle through check
 		
 		if (oldBoard.isWhiteToMove() != oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour()) {
 			
@@ -62,7 +64,15 @@ public class King extends Pieces {
 		
 		if ((magnitudeOfMove == 1) || (magnitudeOfMove == 2)) {
 			
-			//Disable all of that colours castling rights
+			if (oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
+				
+				oldBoard.setCastlingRights(oldBoard.getCastlingRights() & 0b1100);
+				
+			} else {
+				
+				oldBoard.setCastlingRights(oldBoard.getCastlingRights() & 0b0011);
+				
+			}
 			GameBoard newBoard = oldBoard;
 			newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 			printPiece(b.get(toIndexI * 8 + toIndexJ));
@@ -73,7 +83,103 @@ public class King extends Pieces {
 			//row * 8 + col
 			return newBoard;
 			
-		} // else if (checkCastlingRights)
+		} else if (oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
+			
+			// Can disable castling rights after a completed castle
+			if ((lastIndexI == 7) && (lastIndexJ == 4) && (toIndexI == 7) && (toIndexJ == 6) && ((oldBoard.getCastlingRights() & 0b0001) == 0b0001)) { // Attempting Kingside castle
+				
+				// Need a rook check?
+				if ((oldBoard.getBoard()[7][5] != null) || (oldBoard.getBoard()[7][6] != null)) {
+					
+					return oldBoard;
+					
+				}
+				
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
+				newBoard.getBoard()[7][5] = newBoard.getBoard()[7][7];
+				printPiece(b.get(toIndexI * 8 + toIndexJ));
+				newBoard.getBoard()[7][5].printPiece(b.get(7 * 8 + 5));
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[7][7] = null;
+				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				b.get(7 * 8 + 7).setIcon(null);
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+				
+				//row * 8 + col
+				return newBoard;
+			} else if ((lastIndexI == 7) && (lastIndexJ == 4) && (toIndexI == 7) && (toIndexJ == 2) && ((oldBoard.getCastlingRights() & 0b0010) == 0b0010)) { // Attempting Queenside castle
+				
+				// Need a rook check?
+				if ((oldBoard.getBoard()[7][3] != null) || (oldBoard.getBoard()[7][2] != null) || (oldBoard.getBoard()[7][1] != null)) {
+					
+					return oldBoard;
+					
+				}
+				
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
+				newBoard.getBoard()[7][3] = newBoard.getBoard()[7][0];
+				printPiece(b.get(toIndexI * 8 + toIndexJ));
+				newBoard.getBoard()[7][3].printPiece(b.get(7 * 8 + 3));
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[7][0] = null;
+				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				b.get(7 * 8 + 0).setIcon(null);
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+				
+				//row * 8 + col
+				return newBoard;
+			}
+		} else if (!oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
+			
+			// Can disable castling rights after a completed castle
+			if ((lastIndexI == 0) && (lastIndexJ == 4) && (toIndexI == 0) && (toIndexJ == 6) && ((oldBoard.getCastlingRights() & 0b0100) == 0b0100)) { // Attempting Kingside castle
+				
+				// Need a rook check?
+				if ((oldBoard.getBoard()[0][5] != null) || (oldBoard.getBoard()[0][6] != null)) {
+					
+					return oldBoard;
+					
+				}
+				
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
+				newBoard.getBoard()[0][5] = newBoard.getBoard()[0][7];
+				printPiece(b.get(toIndexI * 8 + toIndexJ));
+				newBoard.getBoard()[0][5].printPiece(b.get(0 * 8 + 5));
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[0][7] = null;
+				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				b.get(0 * 8 + 7).setIcon(null);
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+				
+				//row * 8 + col
+				return newBoard;
+			} else if ((lastIndexI == 0) && (lastIndexJ == 4) && (toIndexI == 0) && (toIndexJ == 2) && ((oldBoard.getCastlingRights() & 0b1000) == 0b1000)) { // Attempting Queenside castle
+				
+				// Need a rook check?
+				if ((oldBoard.getBoard()[0][3] != null) || (oldBoard.getBoard()[0][2] != null) || (oldBoard.getBoard()[0][1] != null)) {
+					
+					return oldBoard;
+					
+				}
+				
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
+				newBoard.getBoard()[0][3] = newBoard.getBoard()[0][0];
+				printPiece(b.get(toIndexI * 8 + toIndexJ));
+				newBoard.getBoard()[0][3].printPiece(b.get(0 * 8 + 3));
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[0][0] = null;
+				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+				b.get(0 * 8 + 0).setIcon(null);
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+				
+				//row * 8 + col
+				return newBoard;
+			}
+		}
 		
 		//row * 8 + col
 		return oldBoard;
