@@ -8,7 +8,8 @@ import board.GameBoard;
 
 public abstract class Pieces {
 
-	protected boolean isWhite; 
+	protected boolean isWhite;
+	protected String pieceType;
 	
 	public Pieces(boolean isWhite) {
 		
@@ -19,6 +20,12 @@ public abstract class Pieces {
 	public boolean getColour() {
 		
 		return this.isWhite;
+		
+	}
+	
+	public String pieceType() {
+		
+		return this.pieceType;
 		
 	}
 	

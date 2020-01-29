@@ -15,6 +15,7 @@ public class Rook extends Pieces {
 	public Rook(boolean isWhite) {
 		
 		super(isWhite);
+		super.pieceType = "ROOK";
 		
 	}
 	
@@ -128,6 +129,7 @@ public class Rook extends Pieces {
 			newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 			b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
 			newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+			newBoard.setEnPassantSquare(-1, -1);
 			
 			//row * 8 + col
 			return newBoard;

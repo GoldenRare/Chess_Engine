@@ -15,6 +15,7 @@ public class King extends Pieces {
 	public King(boolean isWhite) {
 		
 		super(isWhite);
+		super.pieceType = "KING";
 		
 	}
 	
@@ -79,6 +80,7 @@ public class King extends Pieces {
 			newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 			b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
 			newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+			newBoard.setEnPassantSquare(-1, -1);
 			
 			//row * 8 + col
 			return newBoard;
@@ -105,6 +107,7 @@ public class King extends Pieces {
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
 				b.get(7 * 8 + 7).setIcon(null);
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+				newBoard.setEnPassantSquare(-1, -1);
 				
 				//row * 8 + col
 				return newBoard;
@@ -127,6 +130,7 @@ public class King extends Pieces {
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
 				b.get(7 * 8 + 0).setIcon(null);
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+				newBoard.setEnPassantSquare(-1, -1);
 				
 				//row * 8 + col
 				return newBoard;
@@ -153,6 +157,7 @@ public class King extends Pieces {
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
 				b.get(0 * 8 + 7).setIcon(null);
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+				newBoard.setEnPassantSquare(-1, -1);
 				
 				//row * 8 + col
 				return newBoard;
@@ -175,6 +180,7 @@ public class King extends Pieces {
 				b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
 				b.get(0 * 8 + 0).setIcon(null);
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+				newBoard.setEnPassantSquare(-1, -1);
 				
 				//row * 8 + col
 				return newBoard;

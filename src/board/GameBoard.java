@@ -12,9 +12,10 @@ import pieces.Rook;
 
 public class GameBoard {
 	
-	private Pieces[][] board = new Pieces[8][8];
+	private Pieces[][] board = new Pieces[8][8]; 
 	private boolean isWhiteToMove;
 	private int castlingRights; //Order of the bits: blackKingQueenside, blackKingKingside, whiteKingQueenside, whiteKingKingside
+	private Square enPassant; 
 	
 	public GameBoard() {
 		
@@ -22,41 +23,39 @@ public class GameBoard {
 		
 	}
 	
-	public Pieces[][] startGame() {
+	private void startGame() {
 		
 		for(int i = 0; i < 8; i++) {
 			
-			board[6][i] = new Pawn(true);
-			board[1][i] = new Pawn(false);
+			this.board[6][i] = new Pawn(true);
+			this.board[1][i] = new Pawn(false);
 			
 		}
 		
-		board[7][0] = new Rook(true);
-		board[7][7] = new Rook(true);
-		board[7][1] = new Knight(true);
-		board[7][6] = new Knight(true);
-		board[7][2] = new Bishop(true);
-		board[7][5] = new Bishop(true);
-		board[7][3] = new Queen(true);
-		board[7][4] = new King(true);
-		board[0][0] = new Rook(false);
-		board[0][7] = new Rook(false);
-		board[0][1] = new Knight(false);
-		board[0][6] = new Knight(false);
-		board[0][2] = new Bishop(false);
-		board[0][5] = new Bishop(false);
-		board[0][3] = new Queen(false);
-		board[0][4] = new King(false);
+		this.board[7][0] = new Rook(true);
+		this.board[7][7] = new Rook(true);
+		this.board[7][1] = new Knight(true);
+		this.board[7][6] = new Knight(true);
+		this.board[7][2] = new Bishop(true);
+		this.board[7][5] = new Bishop(true);
+		this.board[7][3] = new Queen(true);
+		this.board[7][4] = new King(true);
+		this.board[0][0] = new Rook(false);
+		this.board[0][7] = new Rook(false);
+		this.board[0][1] = new Knight(false);
+		this.board[0][6] = new Knight(false);
+		this.board[0][2] = new Bishop(false);
+		this.board[0][5] = new Bishop(false);
+		this.board[0][3] = new Queen(false);
+		this.board[0][4] = new King(false);
 		
 		this.isWhiteToMove = true;
 		this.castlingRights = 0b1111;
-		
-		
-		return this.board;
+		this.enPassant = new Square(-1, -1);
 		
 	}
 	
-	public Pieces[][] getBoard() {
+	public Pieces[][] getBoard() { 
 		
 		return this.board;
 		
@@ -83,6 +82,19 @@ public class GameBoard {
 	public void setCastlingRights(int castlingRights) {
 		
 		this.castlingRights = castlingRights;
+		
+	}
+
+	public Square getEnPassantSquare() {
+		
+		return this.enPassant;
+		
+	}
+
+	public void setEnPassantSquare(int i, int j) {
+		
+		this.enPassant.setI(i);
+		this.enPassant.setJ(j);
 		
 	}
 

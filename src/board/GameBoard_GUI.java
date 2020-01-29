@@ -121,13 +121,6 @@ public class GameBoard_GUI implements ActionListener{
 		int toIndexI = this.squares.indexOf(ae.getSource()) / 8;
 		int toIndexJ = this.squares.indexOf(ae.getSource()) % 8;
 		
-		/*
-		if (this.board[toIndexI][toIndexJ] == null) {
-			
-			this.flag = false;
-			
-		}
-		*/
 		if (this.flag) {
 			
 			try {
@@ -140,7 +133,8 @@ public class GameBoard_GUI implements ActionListener{
 			}
 			//updateBoard(this.board);
 			//System.out.println(Arrays.deepToString(this.board.getBoard()).replace("], ", "]\n")); // Debugging
-			System.out.println(this.board.getCastlingRights());
+			//System.out.println(this.board.getCastlingRights()); // Debugging
+			System.out.println(this.board.getEnPassantSquare().toString()); // Debugging
 			
 		}
 		
