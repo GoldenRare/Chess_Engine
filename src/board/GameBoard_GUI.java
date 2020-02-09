@@ -129,12 +129,13 @@ public class GameBoard_GUI implements ActionListener{
 				
 			} catch (NullPointerException e) {
 				
-				System.out.println("Invalid Move!");
+				//System.out.println("Invalid Move!");
 			}
 			//updateBoard(this.board);
 			//System.out.println(Arrays.deepToString(this.board.getBoard()).replace("], ", "]\n")); // Debugging
 			//System.out.println(this.board.getCastlingRights()); // Debugging
-			System.out.println(this.board.getEnPassantSquare().toString()); // Debugging
+			//System.out.println(this.board.getEnPassantSquare().toString()); // Debugging
+			//System.out.println(Square.isSquareAttacked(this.board, new Square(4, 4), false)); //Debugging
 			
 		}
 		

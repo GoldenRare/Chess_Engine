@@ -7,6 +7,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
 import board.GameBoard;
+import board.Square;
 
 public class King extends Pieces {
 
@@ -97,6 +98,13 @@ public class King extends Pieces {
 					
 				}
 				
+				if (Square.isSquareAttacked(oldBoard, new Square(7, 4), true) || Square.isSquareAttacked(oldBoard, new Square(7, 5), true)
+						|| Square.isSquareAttacked(oldBoard, new Square(7, 6), true)) {
+					
+					return oldBoard;
+					
+				}
+				
 				GameBoard newBoard = oldBoard;
 				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				newBoard.getBoard()[7][5] = newBoard.getBoard()[7][7];
@@ -115,6 +123,13 @@ public class King extends Pieces {
 				
 				// Need a rook check?
 				if ((oldBoard.getBoard()[7][3] != null) || (oldBoard.getBoard()[7][2] != null) || (oldBoard.getBoard()[7][1] != null)) {
+					
+					return oldBoard;
+					
+				}
+				
+				if (Square.isSquareAttacked(oldBoard, new Square(7, 4), true) || Square.isSquareAttacked(oldBoard, new Square(7, 3), true)
+						|| Square.isSquareAttacked(oldBoard, new Square(7, 2), true)) {
 					
 					return oldBoard;
 					
@@ -147,6 +162,13 @@ public class King extends Pieces {
 					
 				}
 				
+				if (Square.isSquareAttacked(oldBoard, new Square(0, 4), false) || Square.isSquareAttacked(oldBoard, new Square(0, 5), false)
+						|| Square.isSquareAttacked(oldBoard, new Square(0, 6), false)) {
+					
+					return oldBoard;
+					
+				}
+				
 				GameBoard newBoard = oldBoard;
 				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				newBoard.getBoard()[0][5] = newBoard.getBoard()[0][7];
@@ -165,6 +187,13 @@ public class King extends Pieces {
 				
 				// Need a rook check?
 				if ((oldBoard.getBoard()[0][3] != null) || (oldBoard.getBoard()[0][2] != null) || (oldBoard.getBoard()[0][1] != null)) {
+					
+					return oldBoard;
+					
+				}
+				
+				if (Square.isSquareAttacked(oldBoard, new Square(0, 4), false) || Square.isSquareAttacked(oldBoard, new Square(0, 3), false)
+						|| Square.isSquareAttacked(oldBoard, new Square(0, 2), false)) {
 					
 					return oldBoard;
 					
