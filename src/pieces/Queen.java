@@ -7,6 +7,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
 import board.GameBoard;
+import utility.Position;
 
 public class Queen extends Pieces {
 
@@ -116,6 +117,9 @@ public class Queen extends Pieces {
 					}
 				}
 			}
+			
+			if (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return oldBoard;
+			
 			GameBoard newBoard = oldBoard;
 			newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 			printPiece(b.get(toIndexI * 8 + toIndexJ));
@@ -191,6 +195,8 @@ public class Queen extends Pieces {
 					y--;
 				}
 			}
+			
+			if (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return oldBoard;
 			
 			GameBoard newBoard = oldBoard;
 			newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];

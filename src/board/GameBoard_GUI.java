@@ -12,6 +12,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
+import utility.Position;
+
 public class GameBoard_GUI implements ActionListener{
 
 	private boolean flag = true;
@@ -125,6 +127,7 @@ public class GameBoard_GUI implements ActionListener{
 			
 			try {
 				
+				//System.out.println(Position.isMyKingInCheck(this.lastIndexI, this.lastIndexJ, toIndexI, toIndexJ, this.board)); // Debugging
 				this.board = this.board.getBoard()[this.lastIndexI][this.lastIndexJ].makeMove(this.lastIndexI, this.lastIndexJ, toIndexI, toIndexJ, this.board, this.squares);
 				
 			} catch (NullPointerException e) {
@@ -136,6 +139,7 @@ public class GameBoard_GUI implements ActionListener{
 			//System.out.println(this.board.getCastlingRights()); // Debugging
 			//System.out.println(this.board.getEnPassantSquare().toString()); // Debugging
 			//System.out.println(Square.isSquareAttacked(this.board, new Square(4, 4), false)); //Debugging
+			//System.out.println(this.board.getKingPieces()[0].getSquare().toString()); // Debugging
 			
 		}
 		
@@ -187,10 +191,9 @@ public class GameBoard_GUI implements ActionListener{
  * 
  */
 
-/*
- * Make sure all captures are working 
+/* 
  * Work on Special movements:
- * 	ex. Castling, En Passant, Pawn Promotions, etc.
+ * Pawn Promotions.
  * Special Cases:
  * 	ex. Detect Checkmate, Detect Stalemate, Does Move Leave King in Check, "Fifty-Move Rule, Threefold Repetition", etc.
  * Making of the engine

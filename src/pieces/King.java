@@ -8,14 +8,15 @@ import javax.swing.JButton;
 
 import board.GameBoard;
 import board.Square;
+import utility.Position;
 
 public class King extends Pieces {
 
 	public double value = 10; //Unsure
 	
-	public King(boolean isWhite) {
+	public King(boolean isWhite, int i, int j) {
 		
-		super(isWhite);
+		super(isWhite, i, j);
 		super.pieceType = "KING";
 		
 	}
@@ -58,6 +59,22 @@ public class King extends Pieces {
 					
 		}
 		
+		int tempI = this.square.getI();
+		int tempJ = this.square.getJ();
+		this.square.setI(toIndexI);
+		this.square.setJ(toIndexJ);
+		
+		if (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) {
+			
+			this.square.setI(tempI);
+			this.square.setJ(tempJ);
+			return oldBoard;
+			
+		}
+		
+		this.square.setI(tempI);
+		this.square.setJ(tempJ);
+		
 		// MAKE SURE TO TAKE IN TO ACCOUNT SAME SQUARE MOVES
 		// Technically not Magnitude 
 		int magnitudeOfI = (toIndexI - lastIndexI) * (toIndexI - lastIndexI);
@@ -82,6 +99,8 @@ public class King extends Pieces {
 			b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
 			newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 			newBoard.setEnPassantSquare(-1, -1);
+			this.square.setI(toIndexI);
+			this.square.setJ(toIndexJ);
 			
 			//row * 8 + col
 			return newBoard;
@@ -116,6 +135,8 @@ public class King extends Pieces {
 				b.get(7 * 8 + 7).setIcon(null);
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
+				this.square.setI(toIndexI);
+				this.square.setJ(toIndexJ);
 				
 				//row * 8 + col
 				return newBoard;
@@ -146,6 +167,8 @@ public class King extends Pieces {
 				b.get(7 * 8 + 0).setIcon(null);
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
+				this.square.setI(toIndexI);
+				this.square.setJ(toIndexJ);
 				
 				//row * 8 + col
 				return newBoard;
@@ -180,6 +203,8 @@ public class King extends Pieces {
 				b.get(0 * 8 + 7).setIcon(null);
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
+				this.square.setI(toIndexI);
+				this.square.setJ(toIndexJ);
 				
 				//row * 8 + col
 				return newBoard;
@@ -210,6 +235,8 @@ public class King extends Pieces {
 				b.get(0 * 8 + 0).setIcon(null);
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
+				this.square.setI(toIndexI);
+				this.square.setJ(toIndexJ);
 				
 				//row * 8 + col
 				return newBoard;
@@ -218,6 +245,12 @@ public class King extends Pieces {
 		
 		//row * 8 + col
 		return oldBoard;
+		
+	}
+	
+	public Square getSquare() {
+		
+		return this.square;
 		
 	}
 }

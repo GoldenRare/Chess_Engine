@@ -17,6 +17,9 @@ public class GameBoard {
 	private int castlingRights; //Order of the bits: blackKingQueenside, blackKingKingside, whiteKingQueenside, whiteKingKingside
 	private Square enPassant; 
 	
+	////////////////
+	private Pieces[] kingPieces; //WhiteKing, BlackKing
+	
 	public GameBoard() {
 		
 		startGame();
@@ -39,7 +42,7 @@ public class GameBoard {
 		this.board[7][2] = new Bishop(true);
 		this.board[7][5] = new Bishop(true);
 		this.board[7][3] = new Queen(true);
-		this.board[7][4] = new King(true);
+		this.board[7][4] = new King(true, 7, 4);
 		this.board[0][0] = new Rook(false);
 		this.board[0][7] = new Rook(false);
 		this.board[0][1] = new Knight(false);
@@ -47,11 +50,14 @@ public class GameBoard {
 		this.board[0][2] = new Bishop(false);
 		this.board[0][5] = new Bishop(false);
 		this.board[0][3] = new Queen(false);
-		this.board[0][4] = new King(false);
+		this.board[0][4] = new King(false, 0, 4);
 		
 		this.isWhiteToMove = true;
 		this.castlingRights = 0b1111;
 		this.enPassant = new Square(-1, -1);
+		
+		////////////////////
+		this.kingPieces = new Pieces[] {this.board[7][4], this.board[0][4]};
 		
 	}
 	
@@ -95,6 +101,12 @@ public class GameBoard {
 		
 		this.enPassant.setI(i);
 		this.enPassant.setJ(j);
+		
+	}
+	
+	public Pieces[] getKingPieces() {
+		
+		return this.kingPieces;
 		
 	}
 

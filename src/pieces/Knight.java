@@ -7,6 +7,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
 import board.GameBoard;
+import utility.Position;
 
 public class Knight extends Pieces {
 
@@ -60,6 +61,8 @@ public class Knight extends Pieces {
 		int knightMagnitude = 5;
 		
 		if (magnitudeOfMove == knightMagnitude) {
+			
+			if (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return oldBoard;
 			
 			GameBoard newBoard = oldBoard;
 			newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];

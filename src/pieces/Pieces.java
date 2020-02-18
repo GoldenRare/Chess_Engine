@@ -5,15 +5,24 @@ import java.util.List;
 import javax.swing.JButton;
 
 import board.GameBoard;
+import board.Square;
 
 public abstract class Pieces {
 
 	protected boolean isWhite;
 	protected String pieceType;
+	protected Square square;
 	
 	public Pieces(boolean isWhite) {
 		
 		this.isWhite = isWhite;
+		
+	}
+	
+	public Pieces(boolean isWhite, int i, int j) {
+		
+		this.isWhite = isWhite;
+		this.square = new Square(i, j);
 		
 	}
 	
@@ -26,6 +35,12 @@ public abstract class Pieces {
 	public String pieceType() {
 		
 		return this.pieceType;
+		
+	}
+	
+	public Square getSquare() {
+		
+		return this.square;
 		
 	}
 	

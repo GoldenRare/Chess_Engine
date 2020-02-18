@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import board.GameBoard;
 import board.Square;
 import board_indexing.Ranks;
+import utility.Position;
 
 public class Pawn extends Pieces {
 
@@ -60,6 +61,8 @@ public class Pawn extends Pieces {
 			
 		}
 
+		if (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return oldBoard;
+		
 		if (Arrays.asList(oldBoard.getBoard()[Ranks.RANK2.ordinal()]).contains(oldBoard.getBoard()[lastIndexI][lastIndexJ]) && oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
 			if (((toIndexI == lastIndexI - 1) && (toIndexJ == lastIndexJ)) || ((toIndexI == lastIndexI - 2) && (toIndexJ == lastIndexJ))) {
 				if ((toIndexI == lastIndexI - 1) && (toIndexJ == lastIndexJ)) {

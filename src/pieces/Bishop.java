@@ -7,6 +7,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
 import board.GameBoard;
+import utility.Position;
 
 public class Bishop extends Pieces {
 
@@ -122,6 +123,8 @@ public class Bishop extends Pieces {
 					y--;
 				}
 			}
+			
+			if (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return oldBoard;
 			
 			GameBoard newBoard = oldBoard;
 			newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
