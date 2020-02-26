@@ -180,21 +180,3 @@ public class GameBoard_GUI implements ActionListener{
 	}
 }
 
-// Handle empty button clicks
-// *Clicking the same square twice
-/*
- * Check to see if move is legal:
- * 
- * You cannot move through pieces
- * Cannot put yourself in check
- * If checked, it must be blocked
- * 
- */
-
-/* 
- * Work on Special movements:
- * Pawn Promotions.
- * Special Cases:
- * 	ex. Detect Checkmate, Detect Stalemate, Does Move Leave King in Check, "Fifty-Move Rule, Threefold Repetition", etc.
- * Making of the engine
- */ 

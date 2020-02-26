@@ -13,9 +13,9 @@ public class Knight extends Pieces {
 
 	public double value = 10; //Unsure
 	
-	public Knight(boolean isWhite) {
+	public Knight(boolean isWhite, int i, int j) {
 		
-		super(isWhite);
+		super(isWhite, i, j);
 		super.pieceType = "KNIGHT";
 		
 	}
@@ -64,6 +64,7 @@ public class Knight extends Pieces {
 			
 			if (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return oldBoard;
 			
+			oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, false, false));
 			GameBoard newBoard = oldBoard;
 			newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 			printPiece(b.get(toIndexI * 8 + toIndexJ));
@@ -71,6 +72,8 @@ public class Knight extends Pieces {
 			b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
 			newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 			newBoard.setEnPassantSquare(-1, -1);
+			this.square.setI(toIndexI);
+			this.square.setJ(toIndexJ);
 			
 			//row * 8 + col
 			return newBoard;
@@ -79,6 +82,34 @@ public class Knight extends Pieces {
 		
 		//row * 8 + col
 		return oldBoard;
+		
+	}
+	
+	public boolean makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, boolean checkPseudoMove) {
+		
+		if (isPieceColourNotTheSideToMove(lastIndexI, lastIndexJ, oldBoard)) return false;
+		if (isToAndFromSquareTheSameColourPiece(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return false;
+		if ((!checkPseudoMove) && (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard))) return false;
+		
+		int magnitudeOfMove = ((toIndexI - lastIndexI) * (toIndexI - lastIndexI)) + ((toIndexJ - lastIndexJ) * (toIndexJ - lastIndexJ));
+		int knightMagnitude = 5;
+		
+		if (magnitudeOfMove == knightMagnitude) {
+			
+			//if (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return false;
+			
+			oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, false, false));
+			updateGameBoard(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
+			this.square.setI(toIndexI);
+			this.square.setJ(toIndexJ);
+			
+			//row * 8 + col
+			return true;
+			
+		}
+		
+		//row * 8 + col
+		return false;
 		
 	}
 }

@@ -42,10 +42,7 @@ public class King extends Pieces {
 	
 	public GameBoard makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, List<JButton> b) {
 		
-		// Consider adding new function for this
-		// Consider bitboards
 		// If castle is correct, castle does not turn off until next king move
-		// Can currently castle through check
 		
 		if (oldBoard.isWhiteToMove() != oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour()) {
 			
@@ -83,15 +80,8 @@ public class King extends Pieces {
 		
 		if ((magnitudeOfMove == 1) || (magnitudeOfMove == 2)) {
 			
-			if (oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
-				
-				oldBoard.setCastlingRights(oldBoard.getCastlingRights() & 0b1100);
-				
-			} else {
-				
-				oldBoard.setCastlingRights(oldBoard.getCastlingRights() & 0b0011);
-				
-			}
+			oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, false, false));
+			disableCastlingRights(lastIndexI, lastIndexJ, oldBoard);
 			GameBoard newBoard = oldBoard;
 			newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 			printPiece(b.get(toIndexI * 8 + toIndexJ));
@@ -124,6 +114,7 @@ public class King extends Pieces {
 					
 				}
 				
+				oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, true, false, false));
 				GameBoard newBoard = oldBoard;
 				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				newBoard.getBoard()[7][5] = newBoard.getBoard()[7][7];
@@ -135,6 +126,7 @@ public class King extends Pieces {
 				b.get(7 * 8 + 7).setIcon(null);
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
+				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b1100);
 				this.square.setI(toIndexI);
 				this.square.setJ(toIndexJ);
 				
@@ -156,6 +148,7 @@ public class King extends Pieces {
 					
 				}
 				
+				oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, true, false));
 				GameBoard newBoard = oldBoard;
 				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				newBoard.getBoard()[7][3] = newBoard.getBoard()[7][0];
@@ -167,6 +160,7 @@ public class King extends Pieces {
 				b.get(7 * 8 + 0).setIcon(null);
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
+				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b1100);
 				this.square.setI(toIndexI);
 				this.square.setJ(toIndexJ);
 				
@@ -192,6 +186,7 @@ public class King extends Pieces {
 					
 				}
 				
+				oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, true, false, false));
 				GameBoard newBoard = oldBoard;
 				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				newBoard.getBoard()[0][5] = newBoard.getBoard()[0][7];
@@ -203,6 +198,7 @@ public class King extends Pieces {
 				b.get(0 * 8 + 7).setIcon(null);
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
+				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b0011);
 				this.square.setI(toIndexI);
 				this.square.setJ(toIndexJ);
 				
@@ -224,6 +220,7 @@ public class King extends Pieces {
 					
 				}
 				
+				oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, true, false));
 				GameBoard newBoard = oldBoard;
 				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				newBoard.getBoard()[0][3] = newBoard.getBoard()[0][0];
@@ -235,6 +232,7 @@ public class King extends Pieces {
 				b.get(0 * 8 + 0).setIcon(null);
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
+				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b0011);
 				this.square.setI(toIndexI);
 				this.square.setJ(toIndexJ);
 				
@@ -246,6 +244,172 @@ public class King extends Pieces {
 		//row * 8 + col
 		return oldBoard;
 		
+	}
+	
+	public boolean makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, boolean checkPseudoMove) {
+		
+		if (isPieceColourNotTheSideToMove(lastIndexI, lastIndexJ, oldBoard)) return false;
+		if (isToAndFromSquareTheSameColourPiece(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return false;	
+		if ((!checkPseudoMove) && (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard))) return false;
+		
+		int magnitudeOfI = (toIndexI - lastIndexI) * (toIndexI - lastIndexI);
+		int magnitudeOfJ = (toIndexJ - lastIndexJ) * (toIndexJ - lastIndexJ);
+		int magnitudeOfMove = magnitudeOfI + magnitudeOfJ;
+		
+		if ((magnitudeOfMove == 1) || (magnitudeOfMove == 2)) {
+			
+			oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, false, false));
+			disableCastlingRights(lastIndexI, lastIndexJ, oldBoard);
+			updateGameBoard(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
+			this.square.setI(toIndexI);
+			this.square.setJ(toIndexJ);
+			return true;
+			
+		} else if (oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
+			
+			// Can disable castling rights after a completed castle
+			if ((lastIndexI == 7) && (lastIndexJ == 4) && (toIndexI == 7) && (toIndexJ == 6) && ((oldBoard.getCastlingRights() & 0b0001) == 0b0001)) { // Attempting Kingside castle
+				
+				// Need a rook check?
+				if ((oldBoard.getBoard()[7][5] != null) || (oldBoard.getBoard()[7][6] != null)) {
+					
+					return false;
+					
+				}
+				
+				if (Square.isSquareAttacked(oldBoard, new Square(7, 4), true) || Square.isSquareAttacked(oldBoard, new Square(7, 5), true)
+						|| Square.isSquareAttacked(oldBoard, new Square(7, 6), true)) {
+					
+					return false;
+					
+				}
+				
+				oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, true, false, false));
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
+				newBoard.getBoard()[7][5] = newBoard.getBoard()[7][7];
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[7][7] = null;
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+				newBoard.setEnPassantSquare(-1, -1);
+				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b1100);
+				this.square.setI(toIndexI);
+				this.square.setJ(toIndexJ);
+				
+				//row * 8 + col
+				return true;
+			} else if ((lastIndexI == 7) && (lastIndexJ == 4) && (toIndexI == 7) && (toIndexJ == 2) && ((oldBoard.getCastlingRights() & 0b0010) == 0b0010)) { // Attempting Queenside castle
+				
+				// Need a rook check?
+				if ((oldBoard.getBoard()[7][3] != null) || (oldBoard.getBoard()[7][2] != null) || (oldBoard.getBoard()[7][1] != null)) {
+					
+					return false;
+					
+				}
+				
+				if (Square.isSquareAttacked(oldBoard, new Square(7, 4), true) || Square.isSquareAttacked(oldBoard, new Square(7, 3), true)
+						|| Square.isSquareAttacked(oldBoard, new Square(7, 2), true)) {
+					
+					return false;
+					
+				}
+				
+				oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, true, false));
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
+				newBoard.getBoard()[7][3] = newBoard.getBoard()[7][0];
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[7][0] = null;
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+				newBoard.setEnPassantSquare(-1, -1);
+				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b1100);
+				this.square.setI(toIndexI);
+				this.square.setJ(toIndexJ);
+				
+				//row * 8 + col
+				return true;
+			}
+		} else if (!oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
+			
+			// Can disable castling rights after a completed castle
+			if ((lastIndexI == 0) && (lastIndexJ == 4) && (toIndexI == 0) && (toIndexJ == 6) && ((oldBoard.getCastlingRights() & 0b0100) == 0b0100)) { // Attempting Kingside castle
+				
+				// Need a rook check?
+				if ((oldBoard.getBoard()[0][5] != null) || (oldBoard.getBoard()[0][6] != null)) {
+					
+					return false;
+					
+				}
+				
+				if (Square.isSquareAttacked(oldBoard, new Square(0, 4), false) || Square.isSquareAttacked(oldBoard, new Square(0, 5), false)
+						|| Square.isSquareAttacked(oldBoard, new Square(0, 6), false)) {
+					
+					return false;
+					
+				}
+				
+				oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, true, false, false));
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
+				newBoard.getBoard()[0][5] = newBoard.getBoard()[0][7];
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[0][7] = null;
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+				newBoard.setEnPassantSquare(-1, -1);
+				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b0011);
+				this.square.setI(toIndexI);
+				this.square.setJ(toIndexJ);
+				
+				//row * 8 + col
+				return true;
+			} else if ((lastIndexI == 0) && (lastIndexJ == 4) && (toIndexI == 0) && (toIndexJ == 2) && ((oldBoard.getCastlingRights() & 0b1000) == 0b1000)) { // Attempting Queenside castle
+				
+				// Need a rook check?
+				if ((oldBoard.getBoard()[0][3] != null) || (oldBoard.getBoard()[0][2] != null) || (oldBoard.getBoard()[0][1] != null)) {
+					
+					return false;
+					
+				}
+				
+				if (Square.isSquareAttacked(oldBoard, new Square(0, 4), false) || Square.isSquareAttacked(oldBoard, new Square(0, 3), false)
+						|| Square.isSquareAttacked(oldBoard, new Square(0, 2), false)) {
+					
+					return false;
+					
+				}
+				
+				oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, true, false));
+				GameBoard newBoard = oldBoard;
+				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
+				newBoard.getBoard()[0][3] = newBoard.getBoard()[0][0];
+				newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
+				newBoard.getBoard()[0][0] = null;
+				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
+				newBoard.setEnPassantSquare(-1, -1);
+				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b0011);
+				this.square.setI(toIndexI);
+				this.square.setJ(toIndexJ);
+				
+				//row * 8 + col
+				return true;
+			}
+		}
+		
+		//row * 8 + col
+		return false;
+		
+	}
+
+	private void disableCastlingRights(int lastIndexI, int lastIndexJ, GameBoard board) {
+		if (board.getBoard()[lastIndexI][lastIndexJ].isWhite) {
+			
+			board.setCastlingRights(board.getCastlingRights() & 0b1100);
+			
+		} else {
+			
+			board.setCastlingRights(board.getCastlingRights() & 0b0011);
+			
+		}
 	}
 	
 	public Square getSquare() {
