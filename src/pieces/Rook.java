@@ -165,8 +165,8 @@ public class Rook extends Pieces {
 		if (isToAndFromSquareTheSameColourPiece(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return false;
 		if ((!checkPseudoMove) && (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard))) return false;
 		
-		if (((lastIndexI == toIndexI) && (toIndexJ >= 0 && toIndexJ <= 8)) || ((lastIndexJ == toIndexJ) && (toIndexI >= 0 && toIndexI <= 8))) {
-			if ((lastIndexJ == toIndexJ) && (toIndexI >= 0 && toIndexI <= 8)) {
+		if (((lastIndexI == toIndexI) && (toIndexJ >= 0 && toIndexJ <= 7)) || ((lastIndexJ == toIndexJ) && (toIndexI >= 0 && toIndexI <= 7))) {
+			if ((lastIndexJ == toIndexJ) && (toIndexI >= 0 && toIndexI <= 7)) {
 				if (lastIndexI < toIndexI) {
 					int i = lastIndexI + 1;
 					while (i < toIndexI) {

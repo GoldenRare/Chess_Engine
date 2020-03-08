@@ -42,13 +42,7 @@ public class King extends Pieces {
 	
 	public GameBoard makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, List<JButton> b) {
 		
-		// If castle is correct, castle does not turn off until next king move
-		
-		if (oldBoard.isWhiteToMove() != oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour()) {
-			
-			return oldBoard;
-			
-		}
+		if (oldBoard.isWhiteToMove() != oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour())
 		
 		if ((oldBoard.getBoard()[toIndexI][toIndexJ] != null) && (oldBoard.getBoard()[lastIndexI][lastIndexJ].getColour() == oldBoard.getBoard()[toIndexI][toIndexJ].getColour())) {
 					
@@ -127,9 +121,11 @@ public class King extends Pieces {
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
 				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b1100);
+				newBoard.getBoard()[7][5].getSquare().setI(7);
+				newBoard.getBoard()[7][5].getSquare().setJ(5);
 				this.square.setI(toIndexI);
 				this.square.setJ(toIndexJ);
-				
+				System.out.println(newBoard.getBoard()[7][5].getSquare().getI() + " " + newBoard.getBoard()[7][5].getSquare().getJ());
 				//row * 8 + col
 				return newBoard;
 			} else if ((lastIndexI == 7) && (lastIndexJ == 4) && (toIndexI == 7) && (toIndexJ == 2) && ((oldBoard.getCastlingRights() & 0b0010) == 0b0010)) { // Attempting Queenside castle
@@ -161,6 +157,8 @@ public class King extends Pieces {
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
 				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b1100);
+				newBoard.getBoard()[7][3].getSquare().setI(7);
+				newBoard.getBoard()[7][3].getSquare().setJ(3);
 				this.square.setI(toIndexI);
 				this.square.setJ(toIndexJ);
 				
@@ -199,6 +197,8 @@ public class King extends Pieces {
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
 				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b0011);
+				newBoard.getBoard()[0][5].getSquare().setI(0);
+				newBoard.getBoard()[0][5].getSquare().setJ(5);
 				this.square.setI(toIndexI);
 				this.square.setJ(toIndexJ);
 				
@@ -233,6 +233,8 @@ public class King extends Pieces {
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
 				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b0011);
+				newBoard.getBoard()[0][3].getSquare().setI(0);
+				newBoard.getBoard()[0][3].getSquare().setJ(3);
 				this.square.setI(toIndexI);
 				this.square.setJ(toIndexJ);
 				
@@ -293,6 +295,8 @@ public class King extends Pieces {
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
 				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b1100);
+				newBoard.getBoard()[7][5].getSquare().setI(7);
+				newBoard.getBoard()[7][5].getSquare().setJ(5);
 				this.square.setI(toIndexI);
 				this.square.setJ(toIndexJ);
 				
@@ -323,6 +327,8 @@ public class King extends Pieces {
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
 				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b1100);
+				newBoard.getBoard()[7][3].getSquare().setI(7);
+				newBoard.getBoard()[7][3].getSquare().setJ(3);
 				this.square.setI(toIndexI);
 				this.square.setJ(toIndexJ);
 				
@@ -357,6 +363,8 @@ public class King extends Pieces {
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
 				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b0011);
+				newBoard.getBoard()[0][5].getSquare().setI(0);
+				newBoard.getBoard()[0][5].getSquare().setJ(5);
 				this.square.setI(toIndexI);
 				this.square.setJ(toIndexJ);
 				
@@ -387,6 +395,8 @@ public class King extends Pieces {
 				newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 				newBoard.setEnPassantSquare(-1, -1);
 				newBoard.setCastlingRights(newBoard.getCastlingRights() & 0b0011);
+				newBoard.getBoard()[0][3].getSquare().setI(0);
+				newBoard.getBoard()[0][3].getSquare().setJ(3);
 				this.square.setI(toIndexI);
 				this.square.setJ(toIndexJ);
 				

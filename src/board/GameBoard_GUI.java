@@ -132,10 +132,11 @@ public class GameBoard_GUI implements ActionListener{
 				
 			} catch (NullPointerException e) {
 				
-				//System.out.println("Invalid Move!");
+				System.out.println("Invalid Move!");
 			}
-			//updateBoard(this.board);
+			
 			//System.out.println(Arrays.deepToString(this.board.getBoard()).replace("], ", "]\n")); // Debugging
+			//System.out.println();
 			//System.out.println(this.board.getCastlingRights()); // Debugging
 			//System.out.println(this.board.getEnPassantSquare().toString()); // Debugging
 			//System.out.println(Square.isSquareAttacked(this.board, new Square(4, 4), false)); //Debugging
@@ -145,7 +146,7 @@ public class GameBoard_GUI implements ActionListener{
 		
 		this.lastIndexI = toIndexI;
 		this.lastIndexJ = toIndexJ;
-		System.out.println("[" + toIndexI + "][" + toIndexJ + "]"); //Debugging
+		//System.out.println("[" + toIndexI + "][" + toIndexJ + "]"); //Debugging
 		
 	}
 	
@@ -174,7 +175,7 @@ public class GameBoard_GUI implements ActionListener{
 	public static void main(String[] args) {
 		
 		//GameBoard_GUI gameBoard = new GameBoard_GUI();
-		GameBoard b = new GameBoard();
+		GameBoard b = new GameBoard("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
 		new GameBoard_GUI(b);
 		
 	}

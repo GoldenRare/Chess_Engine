@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -16,51 +17,59 @@ public class Move {
 	private Pieces piece;
 	private int toIndexI;
 	private int toIndexJ;
+	private char promotionPiece;
 	
 	public Move(Pieces piece, int toIndexI, int toIndexJ) {
+		
+		this(piece, toIndexI, toIndexJ, ' ');
+
+	}
+	
+	public Move(Pieces piece, int toIndexI, int toIndexJ, char promotionPiece) {
 		
 		this.piece = piece;
 		this.toIndexI = toIndexI;
 		this.toIndexJ = toIndexJ;
+		this.promotionPiece = promotionPiece;
 		
 	}
 	
-	// NEED TO CHECK FOR INDEXOUTOFBOUNDS EXCEPTION
-	// CAN PROBABLY GET RID OF THE USE OF UNDOMOVE()
 	public static List<Move> GenerateLegalMoves(GameBoard board) {
 		
 		List<Move> movesList = new ArrayList<Move>();
-		
+		List<Pieces> whitePieces = new ArrayList<Pieces>(board.getWhitePieces());
+		List<Pieces> blackPieces = new ArrayList<Pieces>(board.getBlackPieces());
+		//System.out.println(blackPieces);
 		if (board.isWhiteToMove()) {
 			
-			for (Pieces piece : board.getWhitePieces()) {
+			for (Pieces whitePiece : whitePieces) {
 				
-				if (piece.pieceType().equals("PAWN")) GenerateLegalPawnMoves(movesList, piece, board);
-				if (piece.pieceType().equals("KNIGHT")) GenerateLegalKnightMoves(movesList, piece, board);
-				if (piece.pieceType().equals("BISHOP")) GenerateLegalDiagonalMoves(movesList, piece, board);
-				if (piece.pieceType().equals("ROOK")) GenerateLegalHorizontalVerticalMoves(movesList, piece, board);
-				if (piece.pieceType().equals("QUEEN")) {
+				if (whitePiece.pieceType().equals("PAWN")) GenerateLegalPawnMoves(movesList, whitePiece, board);
+				if (whitePiece.pieceType().equals("KNIGHT")) GenerateLegalKnightMoves(movesList, whitePiece, board);
+				if (whitePiece.pieceType().equals("BISHOP")) GenerateLegalDiagonalMoves(movesList, whitePiece, board);
+				if (whitePiece.pieceType().equals("ROOK")) GenerateLegalHorizontalVerticalMoves(movesList, whitePiece, board);
+				if (whitePiece.pieceType().equals("QUEEN")) {
 					
-					GenerateLegalDiagonalMoves(movesList, piece, board);
-					GenerateLegalHorizontalVerticalMoves(movesList, piece, board);
+					GenerateLegalDiagonalMoves(movesList, whitePiece, board);
+					GenerateLegalHorizontalVerticalMoves(movesList, whitePiece, board);
 				}
-				if (piece.pieceType().equals("KING")) GenerateLegalKingMoves(movesList, piece, board);
+				if (whitePiece.pieceType().equals("KING")) GenerateLegalKingMoves(movesList, whitePiece, board);
 			}
 		} else {
 			
-			for (Pieces piece : board.getBlackPieces()) {
-				
-				if (piece.pieceType().equals("PAWN")) GenerateLegalPawnMoves(movesList, piece, board);
-				if (piece.pieceType().equals("KNIGHT")) GenerateLegalKnightMoves(movesList, piece, board);
-				if (piece.pieceType().equals("BISHOP")) GenerateLegalDiagonalMoves(movesList, piece, board);
-				if (piece.pieceType().equals("ROOK")) GenerateLegalHorizontalVerticalMoves(movesList, piece, board);
-				if (piece.pieceType().equals("QUEEN")) {
+			for (Pieces blackPiece : blackPieces) {
+	
+				if (blackPiece.pieceType().equals("PAWN")) GenerateLegalPawnMoves(movesList, blackPiece, board);
+				if (blackPiece.pieceType().equals("KNIGHT")) GenerateLegalKnightMoves(movesList, blackPiece, board);
+				if (blackPiece.pieceType().equals("BISHOP")) GenerateLegalDiagonalMoves(movesList, blackPiece, board);
+				if (blackPiece.pieceType().equals("ROOK")) GenerateLegalHorizontalVerticalMoves(movesList, blackPiece, board);
+				if (blackPiece.pieceType().equals("QUEEN")) {
 					
-					GenerateLegalDiagonalMoves(movesList, piece, board);
-					GenerateLegalHorizontalVerticalMoves(movesList, piece, board);
+					GenerateLegalDiagonalMoves(movesList, blackPiece, board);
+					GenerateLegalHorizontalVerticalMoves(movesList, blackPiece, board);
 					
 				}
-				if (piece.pieceType().equals("KING")) GenerateLegalKingMoves(movesList, piece, board);
+				if (blackPiece.pieceType().equals("KING")) GenerateLegalKingMoves(movesList, blackPiece, board);
 			}
 		}
 		
@@ -71,17 +80,30 @@ public class Move {
 	private static void GenerateLegalPawnMoves(List<Move> movesList, Pieces piece, GameBoard board) {
 		
 		if (piece.getColour() == true) {
+			
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), 
-					piece.getSquare().getI() - 1, piece.getSquare().getJ(), board, false)) {
+					piece.getSquare().getI() - 1, piece.getSquare().getJ(), board, false, 'Q')) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ()));
+				if (piece.getSquare().getI() - 1 == 0) {
+					
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ(), 'Q'));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ(), 'R'));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ(), 'B'));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ(), 'N'));
+					
+				} else {
+					
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ()));
+					
+				}
+				
 				
 				
 			}
 			
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), 
-					piece.getSquare().getI() - 2, piece.getSquare().getJ(), board, false)) {
+					piece.getSquare().getI() - 2, piece.getSquare().getJ(), board, false, ' ')) {
 				
 				board.undoMove();
 				movesList.add(new Move(piece, piece.getSquare().getI() - 2, piece.getSquare().getJ()));
@@ -89,32 +111,62 @@ public class Move {
 			}
 			
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), 
-					piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, board, false)) {
+					piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, board, false, 'Q')) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1));
+				if (piece.getSquare().getI() - 1 == 0) {
+					
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'Q'));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'R'));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'B'));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'N'));
+					
+				} else {
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1));
+				}
+				
 				
 			}
 			
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), 
-					piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, board, false)) {
+					piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, board, false, 'Q')) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1));
+				if (piece.getSquare().getI() - 1 == 0) {
+					
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'Q'));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'R'));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'B'));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'N'));
+					
+				} else {
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1));
+				}
+				
 				
 			}
 		} else {
 			
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), 
-					piece.getSquare().getI() + 1, piece.getSquare().getJ(), board, false)) {
+					piece.getSquare().getI() + 1, piece.getSquare().getJ(), board, false, 'q')) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ()));
+				if (piece.getSquare().getI() + 1 == 7) {
+					
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ(), 'q'));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ(), 'r'));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ(), 'b'));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ(), 'n'));
+					
+				} else {
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ()));
+				}
+				
 				
 			}
 			
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), 
-					piece.getSquare().getI() + 2, piece.getSquare().getJ(), board, false)) {
+					piece.getSquare().getI() + 2, piece.getSquare().getJ(), board, false, ' ')) {
 				
 				board.undoMove();
 				movesList.add(new Move(piece, piece.getSquare().getI() + 2, piece.getSquare().getJ()));
@@ -122,18 +174,38 @@ public class Move {
 			}
 			
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), 
-					piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, board, false)) {
+					piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, board, false, 'q')) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1));
+				if (piece.getSquare().getI() + 1 == 7) {
+					
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'q'));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'r'));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'b'));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'n'));
+					
+				} else {
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1));
+				}
+				
 				
 			}
 			
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), 
-					piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, board, false)) {
+					piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, board, false, 'q')) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1));
+				if (piece.getSquare().getI() + 1 == 7) {
+					
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'q'));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'r'));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'b'));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'n'));
+					
+				} else {
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1));
+				}
+				
 				
 			}
 		}
@@ -360,7 +432,6 @@ public class Move {
 		if (depth == 0) return 1;
 		
 		List<Move> movesList = GenerateLegalMoves(board);
-		//System.out.println(movesList.size());
 		long nodes = 0;
 		
 		for (int i = 0; i < movesList.size(); i++) {
@@ -369,21 +440,61 @@ public class Move {
 			int lastIndexJ = movesList.get(i).getPiece().getSquare().getJ();
 			int toIndexI = movesList.get(i).getToIndexI();
 			int toIndexJ = movesList.get(i).getToIndexJ();
-			//System.out.println(lastIndexI + " " + lastIndexJ + " " + toIndexI + " " + toIndexJ);
+			char promotionPiece = movesList.get(i).getPromotionPiece();
+			//System.out.println(lastIndexI + " " + lastIndexJ + " " + toIndexI + " " + toIndexJ + " " + promotionPiece);
 			
-			movesList.get(i).getPiece().makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false);
-			//System.out.print(Arrays.deepToString(board.getBoard()).replace("], ", "]\n"));
-			//System.out.println("\n");
+			if (movesList.get(i).getPiece().pieceType().equals("PAWN")) {
+				
+				movesList.get(i).getPiece().makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false, promotionPiece);
+				
+			} else {
+				
+				movesList.get(i).getPiece().makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false);
+				
+			}
+			
 			nodes += Perft(depth - 1, board);
-			//System.out.println(nodes);
-			
 			board.undoMove();
-			//System.out.print(Arrays.deepToString(board.getBoard()).replace("], ", "]\n"));
-			//System.out.println("\n");
 			
 		}
 		
 		return nodes;
+	}
+	
+	public static void Divide(int depth, GameBoard board) {
+		
+		List<Move> movesList = GenerateLegalMoves(board);
+		int total = 0;
+
+		for (int i = 0; i < movesList.size(); i++) {
+			
+			int lastIndexI = movesList.get(i).getPiece().getSquare().getI();
+			int lastIndexJ = movesList.get(i).getPiece().getSquare().getJ();
+			int toIndexI = movesList.get(i).getToIndexI();
+			int toIndexJ = movesList.get(i).getToIndexJ();
+			char promotionPiece = movesList.get(i).getPromotionPiece();
+			
+			if (movesList.get(i).getPiece().pieceType().equals("PAWN")) {
+				
+				movesList.get(i).getPiece().makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false, promotionPiece);
+				
+			} else {
+				
+				movesList.get(i).getPiece().makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false);
+				
+			}
+			
+			long result = Perft(depth, board);
+			board.undoMove();
+			System.out.println(lastIndexI + " " + lastIndexJ + " " + toIndexI + " " + toIndexJ + ": " + result);
+			total += result;
+			
+		}
+		
+		System.out.println("Moves: " + movesList.size());
+        System.out.println("Total: " + total);
+		
+		
 	}
 
 	public Pieces getPiece() {
@@ -404,9 +515,37 @@ public class Move {
 		
 	}
 	
+	public char getPromotionPiece() {
+		
+		return this.promotionPiece;
+		
+	}
+
 	public static void main(String[] args) {
 		
 		GameBoard b = new GameBoard();
+		System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(6, b)));
+		
+		GameBoard c = new GameBoard("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
+		System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(5, c)));
+		
+		GameBoard d = new GameBoard("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -");
+		System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(7, d)));
+		
+		GameBoard e = new GameBoard("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
+		System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(6, e)));
+		
+		GameBoard f = new GameBoard("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1");
+		System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(6, f)));
+		
+		GameBoard g = new GameBoard("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8");
+		System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(5, g)));
+		
+		GameBoard h = new GameBoard("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10");
+		System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(5, h)));
+		
+		
+		/*
 		System.out.println("PERFORMANCE TEST\n");
 		
 		System.out.println("By Move 1 there are 20 different chess positions:");
@@ -464,6 +603,6 @@ public class Move {
 		finish = Instant.now();
 		timeElapsed = Duration.between(start, finish).toMinutes();
 		System.out.println("Algorithm took " + timeElapsed + " minutes.\n");
-		
+		*/
 	}
 }

@@ -16,7 +16,7 @@ import utility.Position;
 
 public class GameBoard {
 	
-	private Pieces[][] board = new Pieces[8][8]; 
+	private Pieces[][] board; 
 	private boolean isWhiteToMove;
 	private int castlingRights; //Order of the bits: blackKingQueenside, blackKingKingside, whiteKingQueenside, whiteKingKingside
 	private Square enPassant; 
@@ -26,6 +26,9 @@ public class GameBoard {
 	private Pieces[] kingPieces; //WhiteKing, BlackKing
 	private List<Pieces> whitePieces;
 	private List<Pieces> blackPieces;
+	///////////////
+	private int parseFenI;
+	private int parseFenJ;
 	///////////////
 	
 	public GameBoard() {
@@ -42,6 +45,7 @@ public class GameBoard {
 	
 	private void startGame() {
 		
+		this.board = new Pieces[8][8];
 		this.whitePieces = new ArrayList<Pieces>();
 		this.blackPieces = new ArrayList<Pieces>();
 		
@@ -101,26 +105,213 @@ public class GameBoard {
 	
 	private void parseFen(String fen) {
 		
+		this.board = new Pieces[8][8];
+		this.whitePieces = new ArrayList<Pieces>();
+		this.blackPieces = new ArrayList<Pieces>();
+		this.castlingRights = 0b0000;
+		this.enPassant = new Square(-1, -1); // Needs to be implemented
+		this.kingPieces = new Pieces[2];
+		this.previousGameStates = new Stack<Position>();
+		
+		int k = 0;
+		for (this.parseFenI = 0; this.parseFenI < 8; this.parseFenI++) {
+			for (this.parseFenJ = 0; this.parseFenJ < 8; this.parseFenJ++) {
+				piecePlacements(fen.charAt(k));
+				k++;
+			}
+		}
+		k++;
+		this.isWhiteToMove = (fen.charAt(k) == 'w') ? true : false;
+		k = k + 2;
+		while (fen.charAt(k) != ' ') {
+			
+			castlingAbility(fen.charAt(k));
+			k++;
+			
+		}
 	}
 	
-	//The Pieces internal square
-	//Print onto the board
+	private void piecePlacements(char c) {
+		
+		switch (c) {
+		
+		case 'r':
+			
+			this.board[this.parseFenI][this.parseFenJ] = new Rook(false, this.parseFenI, this.parseFenJ);
+			this.blackPieces.add(this.board[this.parseFenI][this.parseFenJ]);
+			break;
+			
+		case 'n':
+			
+			this.board[this.parseFenI][this.parseFenJ] = new Knight(false, this.parseFenI, this.parseFenJ);
+			this.blackPieces.add(this.board[this.parseFenI][this.parseFenJ]);
+			break;
+			
+		case 'b':
+			
+			this.board[this.parseFenI][this.parseFenJ] = new Bishop(false, this.parseFenI, this.parseFenJ);
+			this.blackPieces.add(this.board[this.parseFenI][this.parseFenJ]);
+			break;
+			
+		case 'q': 
+			
+			this.board[this.parseFenI][this.parseFenJ] = new Queen(false, this.parseFenI, this.parseFenJ);
+			this.blackPieces.add(this.board[this.parseFenI][this.parseFenJ]);
+			break;
+			
+		case 'k':
+			
+			this.board[this.parseFenI][this.parseFenJ] = new King(false, this.parseFenI, this.parseFenJ);
+			this.blackPieces.add(this.board[this.parseFenI][this.parseFenJ]);
+			this.kingPieces[1] = this.board[this.parseFenI][this.parseFenJ];
+			break;
+			
+		case 'p': 
+			
+			this.board[this.parseFenI][this.parseFenJ] = new Pawn(false, this.parseFenI, this.parseFenJ);
+			this.blackPieces.add(this.board[this.parseFenI][this.parseFenJ]);
+			break;
+			
+		case 'R':
+			
+			this.board[this.parseFenI][this.parseFenJ] = new Rook(true, this.parseFenI, this.parseFenJ);
+			this.whitePieces.add(this.board[this.parseFenI][this.parseFenJ]);
+			break;
+			
+		case 'N':
+			
+			this.board[this.parseFenI][this.parseFenJ] = new Knight(true, this.parseFenI, this.parseFenJ);
+			this.whitePieces.add(this.board[this.parseFenI][this.parseFenJ]);
+			break;
+			
+		case 'B':
+			
+			this.board[this.parseFenI][this.parseFenJ] = new Bishop(true, this.parseFenI, this.parseFenJ);
+			this.whitePieces.add(this.board[this.parseFenI][this.parseFenJ]);
+			break;
+			
+		case 'Q': 
+			
+			this.board[this.parseFenI][this.parseFenJ] = new Queen(true, this.parseFenI, this.parseFenJ);
+			this.whitePieces.add(this.board[this.parseFenI][this.parseFenJ]);
+			break;
+			
+		case 'K':
+			
+			this.board[this.parseFenI][this.parseFenJ] = new King(true, this.parseFenI, this.parseFenJ);
+			this.whitePieces.add(this.board[this.parseFenI][this.parseFenJ]);
+			this.kingPieces[0] = this.board[this.parseFenI][this.parseFenJ];
+			break;
+			
+		case 'P': 
+			
+			this.board[this.parseFenI][this.parseFenJ] = new Pawn(true, this.parseFenI, this.parseFenJ);
+			this.whitePieces.add(this.board[this.parseFenI][this.parseFenJ]);
+			break;
+			
+		case '/':
+			
+			this.parseFenJ = this.parseFenJ - 1;
+			break;
+			
+		case '1':
+			
+			break;
+			
+		case '2':
+			
+			this.parseFenJ = this.parseFenJ + 1;
+			break;
+			
+		case '3':
+			
+			this.parseFenJ = this.parseFenJ + 2;
+			break;
+			
+		case '4':
+			
+			this.parseFenJ = this.parseFenJ + 3;
+			break;
+			
+		case '5':
+			
+			this.parseFenJ = this.parseFenJ + 4;
+			break;
+			
+		case '6':
+			
+			this.parseFenJ = this.parseFenJ + 5;
+			break;
+			
+		case '7':
+			
+			this.parseFenJ = this.parseFenJ + 6;
+			break;
+			
+		case '8':
+			
+			this.parseFenJ = this.parseFenJ + 7;
+			break;
+		
+		}
+	}
+	
+	private void castlingAbility(char c) {
+		
+		switch (c) {
+		
+		case 'K':
+			
+			setCastlingRights(getCastlingRights() | 0b0001);
+			break;
+			
+		case 'Q':
+			
+			setCastlingRights(getCastlingRights() | 0b0010);
+			break;
+			
+		case 'k':
+			
+			setCastlingRights(getCastlingRights() | 0b0100);
+			break;
+			
+		case 'q':
+			
+			setCastlingRights(getCastlingRights() | 0b1000);
+			break;
+			
+		case '-':
+			
+			break;
+		
+		}
+	}
+	
 	public void undoMove() {
 		
-		//System.out.println(this.getPreviousGameStates().size());
+		//System.out.print(Arrays.deepToString(this.board).replace("], ", "]\n"));
+		//System.out.println("\n");
 		Position restorePosition = this.previousGameStates.pop();
-		//System.out.println(this.getPreviousGameStates().size());
-		//System.out.println(restorePosition.enPassantI() + " " + restorePosition.enPassantJ());
 		
 		this.isWhiteToMove = restorePosition.isWhiteToMove();
-		//System.out.println(restorePosition.lastIndexI() + " " + restorePosition.lastIndexJ() + " " + restorePosition.toIndexI() + " " + restorePosition.toIndexJ() + " Undo");
 		this.castlingRights = restorePosition.castlingRights();
 		this.enPassant.setI(restorePosition.enPassantI());
 		this.enPassant.setJ(restorePosition.enPassantJ());
-		this.board[restorePosition.lastIndexI()][restorePosition.lastIndexJ()] = this.board[restorePosition.toIndexI()][restorePosition.toIndexJ()];
-		this.board[restorePosition.lastIndexI()][restorePosition.lastIndexJ()].getSquare().setI(restorePosition.lastIndexI());
-		this.board[restorePosition.lastIndexI()][restorePosition.lastIndexJ()].getSquare().setJ(restorePosition.lastIndexJ());
 		
+		if (isPromotionMove(restorePosition)) {
+			
+			// Adds back in promoted pawn (internal board and pieceList)
+			// Removes promoted piece (internal board and pieceList)
+			undoPromotion(restorePosition);
+			
+		} else {
+			
+			this.board[restorePosition.lastIndexI()][restorePosition.lastIndexJ()] = this.board[restorePosition.toIndexI()][restorePosition.toIndexJ()];
+			this.board[restorePosition.lastIndexI()][restorePosition.lastIndexJ()].getSquare().setI(restorePosition.lastIndexI());
+			this.board[restorePosition.lastIndexI()][restorePosition.lastIndexJ()].getSquare().setJ(restorePosition.lastIndexJ());
+			
+		}
+	
 		if (restorePosition.castlingKingSide()) restoreKingSideRook(restorePosition.lastIndexI(), restorePosition.lastIndexJ()); //TODO
 		if (restorePosition.castlingQueenSide()) restoreQueenSideRook(restorePosition.lastIndexI(), restorePosition.lastIndexJ()); //TODO
 		
@@ -145,8 +336,44 @@ public class GameBoard {
 			this.blackPieces.add(restorePosition.capturedPiece());
 			
 		}
-		//System.out.print(Arrays.deepToString(this.getBoard()).replace("], ", "]\n"));
+		
+		//System.out.print(Arrays.deepToString(this.board).replace("], ", "]\n"));
 		//System.out.println("\n");
+	}
+
+	private boolean isPromotionMove(Position restorePosition) {
+		
+		boolean result = false;
+		
+		if ((restorePosition.promotedPawn().pieceType().equals("PAWN")) && ((restorePosition.toIndexI() == 0) || (restorePosition.toIndexI() == 7))) {
+			
+			result = true;
+			
+		} 
+		
+		return result;
+	}
+
+	private void undoPromotion(Position restorePosition) {
+		
+		this.board[restorePosition.lastIndexI()][restorePosition.lastIndexJ()] = restorePosition.promotedPawn();
+		this.board[restorePosition.lastIndexI()][restorePosition.lastIndexJ()].getSquare().setI(restorePosition.lastIndexI());
+		this.board[restorePosition.lastIndexI()][restorePosition.lastIndexJ()].getSquare().setJ(restorePosition.lastIndexJ());
+		
+		if ((this.board[restorePosition.toIndexI()][restorePosition.toIndexJ()] != null) && (this.board[restorePosition.toIndexI()][restorePosition.toIndexJ()].getColour() == true)) {
+			
+			this.whitePieces.add(restorePosition.promotedPawn());
+			this.whitePieces.remove(this.board[restorePosition.toIndexI()][restorePosition.toIndexJ()]);
+			this.board[restorePosition.toIndexI()][restorePosition.toIndexJ()] = null; //
+
+		} else if ((this.board[restorePosition.toIndexI()][restorePosition.toIndexJ()] != null) && (this.board[restorePosition.toIndexI()][restorePosition.toIndexJ()].getColour() == false)) {
+			
+			this.blackPieces.add(restorePosition.promotedPawn());
+			this.blackPieces.remove(this.board[restorePosition.toIndexI()][restorePosition.toIndexJ()]);
+			this.board[restorePosition.toIndexI()][restorePosition.toIndexJ()] = null; //
+			
+		}
+		
 	}
 	
 	public Pieces[][] getBoard() { 
@@ -226,11 +453,15 @@ public class GameBoard {
 		if (this.board[lastIndexI][lastIndexJ].getColour() == true) {
 			
 			this.board[7][7] = this.board[7][5];
+			this.board[7][7].getSquare().setI(7);
+			this.board[7][7].getSquare().setJ(7);
 			this.board[7][5] = null;
 			
 		} else {
 			
 			this.board[0][7] = this.board[0][5];
+			this.board[0][7].getSquare().setI(0);
+			this.board[0][7].getSquare().setJ(7);
 			this.board[0][5] = null;
 			
 		}
@@ -241,11 +472,15 @@ public class GameBoard {
 		if (this.board[lastIndexI][lastIndexJ].getColour() == true) {
 			
 			this.board[7][0] = this.board[7][3];
+			this.board[7][0].getSquare().setI(7);
+			this.board[7][0].getSquare().setJ(0);
 			this.board[7][3] = null;
 			
 		} else {
 			
 			this.board[0][0] = this.board[0][3];
+			this.board[0][0].getSquare().setI(0);
+			this.board[0][0].getSquare().setJ(0);
 			this.board[0][3] = null;
 			
 		}
@@ -253,8 +488,9 @@ public class GameBoard {
 	
 	public static void main(String[] args) {
 		
-		GameBoard b = new GameBoard();
+		GameBoard b = new GameBoard("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
 		System.out.print(Arrays.deepToString(b.getBoard()).replace("], ", "]\n"));
+		System.out.println(b.isWhiteToMove);
 		
 	}
 

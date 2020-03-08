@@ -348,44 +348,23 @@ public class Pawn extends Pieces {
 		return oldBoard;
 		
 	}
-	
-	public boolean makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, boolean checkPseudoMove) {
+	public boolean makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, boolean checkPseudoMove) {return false;}
+	public boolean makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, boolean checkPseudoMove, char promotionPiece) {
 		
 		Square setEnPassantSquare = new Square(-1, -1);
 		
 		if ((toIndexI < 0) || (toIndexI > 7) || (toIndexJ < 0) || (toIndexJ > 7)) return false;
 		if (isPieceColourNotTheSideToMove(lastIndexI, lastIndexJ, oldBoard)) return false;
 		if (isToAndFromSquareTheSameColourPiece(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return false;
-		if ((!checkPseudoMove) && (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard))) return false;
+		if ((!checkPseudoMove) && (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, promotionPiece))) return false;
 		
-		if (Arrays.asList(oldBoard.getBoard()[Ranks.RANK2.ordinal()]).contains(oldBoard.getBoard()[lastIndexI][lastIndexJ]) && oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
-			if ((toIndexI == lastIndexI - 2) && (toIndexJ == lastIndexJ)) {
-					
-				if (canPawnNotMoveUpTwo(toIndexI, toIndexJ, oldBoard)) return false;
-				setPotentialEnPassantSquare(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare);
-				//System.out.println(setEnPassantSquare.getI() + "  aaa  " + setEnPassantSquare.getJ());
-				return validMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare);
-					
-			} 	
-				 
-		}
-		
-		if (Arrays.asList(oldBoard.getBoard()[Ranks.RANK7.ordinal()]).contains(oldBoard.getBoard()[lastIndexI][lastIndexJ]) && !oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
-			if ((toIndexI == lastIndexI + 2) && (toIndexJ == lastIndexJ)) {
-				
-				if (canPawnNotMoveUpTwoBlack(toIndexI, toIndexJ, oldBoard)) return false;
-				setPotentialEnPassantSquareBlack(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare);
-				//System.out.println(setEnPassantSquare.getI() + "  aaa  " + setEnPassantSquare.getJ());
-				return validMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare);
-				
-			}
-				
-		}
+		if (canPawnMoveUpTwo(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare)) return validMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare);
 		
 		if (oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
 			
 			if ((toIndexI == lastIndexI - 1) && (toIndexJ == lastIndexJ)) {
 				if (canPawnNotMoveUpOne(toIndexI, toIndexJ, oldBoard)) return false;
+				if (isItAPromotionMove(lastIndexI, lastIndexJ, toIndexI, oldBoard)) return validPromotionMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare, promotionPiece); 
 				return validMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare);
 				
 			} else if ((toIndexI == lastIndexI - 1) && ((toIndexJ == lastIndexJ + 1) || (toIndexJ == lastIndexJ - 1))) {
@@ -414,6 +393,7 @@ public class Pawn extends Pieces {
 					return false;
 					
 				}
+				if (isItAPromotionMove(lastIndexI, lastIndexJ, toIndexI, oldBoard)) return validPromotionMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare, promotionPiece);
 				return validMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare);
 			}
 		} 
@@ -423,6 +403,7 @@ public class Pawn extends Pieces {
 			
 			if ((toIndexI == lastIndexI + 1) && (toIndexJ == lastIndexJ)) {
 				if (canPawnNotMoveUpOne(toIndexI, toIndexJ, oldBoard)) return false;
+				if (isItAPromotionMove(lastIndexI, lastIndexJ, toIndexI, oldBoard)) return validPromotionMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare, promotionPiece);
 				return validMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare);
 				
 			} else if ((toIndexI == lastIndexI + 1) && ((toIndexJ == lastIndexJ + 1) || (toIndexJ == lastIndexJ - 1))) {
@@ -452,12 +433,39 @@ public class Pawn extends Pieces {
 					
 				}
 				
+				if (isItAPromotionMove(lastIndexI, lastIndexJ, toIndexI, oldBoard)) return validPromotionMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare, promotionPiece);
 				return validMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, setEnPassantSquare);
 			}
 		}
 
 		return false;
 		
+	}
+
+	private boolean canPawnMoveUpTwo(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard board, Square setEnPassantSquare) {
+		
+		boolean result = false;
+		
+		if (Arrays.asList(board.getBoard()[Ranks.RANK2.ordinal()]).contains(board.getBoard()[lastIndexI][lastIndexJ]) && board.getBoard()[lastIndexI][lastIndexJ].isWhite) {
+			if ((toIndexI == lastIndexI - 2) && (toIndexJ == lastIndexJ)) {
+					
+				if (canPawnNotMoveUpTwo(toIndexI, toIndexJ, board)) return result;
+				setPotentialEnPassantSquare(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, setEnPassantSquare);
+				result = true;
+				
+			} 	
+		} else if (Arrays.asList(board.getBoard()[Ranks.RANK7.ordinal()]).contains(board.getBoard()[lastIndexI][lastIndexJ]) && !board.getBoard()[lastIndexI][lastIndexJ].isWhite) {
+			if ((toIndexI == lastIndexI + 2) && (toIndexJ == lastIndexJ)) {
+				
+				if (canPawnNotMoveUpTwoBlack(toIndexI, toIndexJ, board)) return result;
+				setPotentialEnPassantSquareBlack(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, setEnPassantSquare);
+				result = true;
+				
+			}
+		}
+		
+		return result;
+
 	}
 
 	private boolean validMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard board,
@@ -468,11 +476,29 @@ public class Pawn extends Pieces {
 		this.square.setJ(toIndexJ);
 		return true;
 	}
+	
+	private boolean validPromotionMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard board,
+			Square setEnPassantSquare, char promotionPiece) {
+		board.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false, false, false));
+		updatePromotionBoard(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, setEnPassantSquare, promotionPiece);
+		return true;
+	}
 
 	private void updateBoard(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard board, Square setEnPassantSquare) {
 		
-		removePiece(board, toIndexI, toIndexJ); //
+		removePiece(board, toIndexI, toIndexJ);
 		board.getBoard()[toIndexI][toIndexJ] = board.getBoard()[lastIndexI][lastIndexJ];
+		board.getBoard()[lastIndexI][lastIndexJ] = null;
+		board.setWhiteToMove(!board.isWhiteToMove());
+		board.setEnPassantSquare(setEnPassantSquare.getI(), setEnPassantSquare.getJ());
+		
+	}
+	
+	private void updatePromotionBoard(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard board, Square setEnPassantSquare, char promotionPiece) {
+		
+		removePiece(board, toIndexI, toIndexJ);
+		removePiece(board, lastIndexI, lastIndexJ);
+		choosePromotionPiece(toIndexI, toIndexJ, board, promotionPiece);
 		board.getBoard()[lastIndexI][lastIndexJ] = null;
 		board.setWhiteToMove(!board.isWhiteToMove());
 		board.setEnPassantSquare(setEnPassantSquare.getI(), setEnPassantSquare.getJ());
@@ -540,4 +566,117 @@ public class Pawn extends Pieces {
 		return false;
 			
 	}
+	
+	private boolean isItAPromotionMove(int lastIndexI, int lastIndexJ, int toIndexI, GameBoard board) {
+		
+		boolean result = false;
+		if (board.getBoard()[lastIndexI][lastIndexJ].isWhite) {
+			
+			result = (toIndexI == 0) ? true : false;
+			
+		} else {
+			
+			result = (toIndexI == 7) ? true : false;
+			
+		}
+		
+		return result;
+		
+	}
+	
+	private void choosePromotionPiece(int toIndexI, int toIndexJ, GameBoard board, char c) {
+		
+		switch (c) {
+		
+		case 'r':
+			
+			board.getBoard()[toIndexI][toIndexJ] = new Rook(false, toIndexI, toIndexJ);
+			board.getBlackPieces().add(board.getBoard()[toIndexI][toIndexJ]);
+			break;
+			
+		case 'n':
+			
+			board.getBoard()[toIndexI][toIndexJ] = new Knight(false, toIndexI, toIndexJ);
+			board.getBlackPieces().add(board.getBoard()[toIndexI][toIndexJ]);
+			break;
+			
+		case 'b':
+			
+			board.getBoard()[toIndexI][toIndexJ] = new Bishop(false, toIndexI, toIndexJ);
+			board.getBlackPieces().add(board.getBoard()[toIndexI][toIndexJ]);
+			break;
+			
+		case 'q': 
+			
+			board.getBoard()[toIndexI][toIndexJ] = new Queen(false, toIndexI, toIndexJ);
+			board.getBlackPieces().add(board.getBoard()[toIndexI][toIndexJ]);
+			break;	
+			
+		case 'R':
+			
+			board.getBoard()[toIndexI][toIndexJ] = new Rook(true, toIndexI, toIndexJ);
+			board.getWhitePieces().add(board.getBoard()[toIndexI][toIndexJ]);
+			break;
+			
+		case 'N':
+			
+			board.getBoard()[toIndexI][toIndexJ] = new Knight(true, toIndexI, toIndexJ);
+			board.getWhitePieces().add(board.getBoard()[toIndexI][toIndexJ]);
+			break;
+			
+		case 'B':
+			
+			board.getBoard()[toIndexI][toIndexJ] = new Bishop(true, toIndexI, toIndexJ);
+			board.getWhitePieces().add(board.getBoard()[toIndexI][toIndexJ]);
+			break;
+			
+		case 'Q': 
+			
+			board.getBoard()[toIndexI][toIndexJ] = new Queen(true, toIndexI, toIndexJ);
+			board.getWhitePieces().add(board.getBoard()[toIndexI][toIndexJ]);
+			break;
+			
+		default:
+			break;
+		
+		}
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -231,8 +231,8 @@ public class Queen extends Pieces {
 		int magnitudeOfI = (toIndexI - lastIndexI) * (toIndexI - lastIndexI);
 		int magnitudeOfJ = (toIndexJ - lastIndexJ) * (toIndexJ - lastIndexJ);
 		
-		if (((lastIndexI == toIndexI) && (toIndexJ >= 0 && toIndexJ <= 8)) || ((lastIndexJ == toIndexJ) && (toIndexI >= 0 && toIndexI <= 8))) {
-			if ((lastIndexJ == toIndexJ) && (toIndexI >= 0 && toIndexI <= 8)) {
+		if (((lastIndexI == toIndexI) && (toIndexJ >= 0 && toIndexJ <= 7)) || ((lastIndexJ == toIndexJ) && (toIndexI >= 0 && toIndexI <= 7))) {
+			if ((lastIndexJ == toIndexJ) && (toIndexI >= 0 && toIndexI <= 7)) {
 				if (lastIndexI < toIndexI) {
 					int i = lastIndexI + 1;
 					while (i < toIndexI) {

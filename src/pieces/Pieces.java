@@ -75,10 +75,12 @@ public abstract class Pieces {
 		
 		if ((newBoard.getBoard()[toIndexI][toIndexJ] != null) && (newBoard.getBoard()[toIndexI][toIndexJ].getColour() == true)) {
 			
+			capturedWhiteRook(newBoard, toIndexI, toIndexJ);
 			newBoard.getWhitePieces().remove(newBoard.getBoard()[toIndexI][toIndexJ]);
 			
 		} else if ((newBoard.getBoard()[toIndexI][toIndexJ] != null) && (newBoard.getBoard()[toIndexI][toIndexJ].getColour() == false)) {
 			
+			capturedBlackRook(newBoard, toIndexI, toIndexJ);
 			newBoard.getBlackPieces().remove(newBoard.getBoard()[toIndexI][toIndexJ]);
 		}
 	}
@@ -86,6 +88,29 @@ public abstract class Pieces {
 	public abstract void printPiece(JButton b);
 	public abstract GameBoard makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, List<JButton> b);
 	public abstract boolean makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, boolean checkPseudoMove);
+	public boolean makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, boolean checkPseudoMove, char promotionPiece) { return false; }
+	
+	private void capturedWhiteRook(GameBoard board, int toIndexI, int toIndexJ) {
+		
+		if (board.getBoard()[toIndexI][toIndexJ].pieceType().equals("ROOK")) {
+			if ((toIndexI == 7) && (toIndexJ == 7)) {
+				board.setCastlingRights(board.getCastlingRights() & 0b1110);
+			} else if ((toIndexI == 7) && (toIndexJ == 0)) {
+				board.setCastlingRights(board.getCastlingRights() & 0b1101);
+			}	
+		}	
+	}
+	
+	private void capturedBlackRook(GameBoard board, int toIndexI, int toIndexJ) {
+		
+		if (board.getBoard()[toIndexI][toIndexJ].pieceType().equals("ROOK")) {
+			if ((toIndexI == 0) && (toIndexJ == 7)) {
+				board.setCastlingRights(board.getCastlingRights() & 0b1011);
+			} else if ((toIndexI == 0) && (toIndexJ == 0)) {
+				board.setCastlingRights(board.getCastlingRights() & 0b0111);
+			}	
+		}	
+	}
 	
 	
 	

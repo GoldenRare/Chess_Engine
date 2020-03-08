@@ -15,6 +15,7 @@ public class Position {
 	private int toIndexI;
 	private int toIndexJ;
 	private Pieces capturedPiece = null;
+	private Pieces promotedPawn = null;
 	private boolean castlingKingSide;
 	private boolean castlingQueenSide;
 	private boolean isEnPassantMove;
@@ -24,34 +25,6 @@ public class Position {
 		stateBeforeMakeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, castlingKingSide, castlingQueenSide, isEnPassantMove);
 		
 	}
-	
-
-	/* WILL HAVE TO GENERATE PSEUDO LEGAL MOVE FIRST
-	public static boolean isMyKingInCheck(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard board) {
-		
-		boolean result;
-		Pieces pieceMoving = board.getBoard()[lastIndexI][lastIndexJ];
-		Pieces pieceMaybeTaking = board.getBoard()[toIndexI][toIndexJ];
-
-		board.getBoard()[toIndexI][toIndexJ] = pieceMoving;
-		board.getBoard()[lastIndexI][lastIndexJ] = null;
-
-		if (board.getBoard()[toIndexI][toIndexJ].getColour() == true) {
-			
-			result = Square.isSquareAttacked(board, board.getKingPieces()[0].getSquare(), true);
-			
-		} else {
-			
-			result = Square.isSquareAttacked(board, board.getKingPieces()[1].getSquare(), false);
-			
-		}
-		
-		board.getBoard()[toIndexI][toIndexJ] = pieceMaybeTaking;
-		board.getBoard()[lastIndexI][lastIndexJ] = pieceMoving;
-
-		return result;
-		
-	}*/
 	
 	// King square not updating may still need to be checked
 	public static boolean isMyKingInCheck(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard board) {
@@ -75,7 +48,27 @@ public class Position {
 		
 	}
 	
-	// Will have to determine how this will work with pieceLists
+	public static boolean isMyKingInCheck(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard board, char promotionPiece) {
+		
+		boolean result = true;
+		
+		if (board.getBoard()[lastIndexI][lastIndexJ].makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, true, promotionPiece)) {
+			if (board.getBoard()[toIndexI][toIndexJ].getColour() == true) {
+				
+				result = Square.isSquareAttacked(board, board.getKingPieces()[0].getSquare(), true);
+				
+			} else {
+				
+				result = Square.isSquareAttacked(board, board.getKingPieces()[1].getSquare(), false);
+				
+			}
+			board.undoMove();
+		}
+
+		return result;
+		
+	}
+	
 	private void stateBeforeMakeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard board, boolean castlingKingSide, boolean castlingQueenSide, boolean isEnPassantMove) {
 		
 		this.isWhiteToMove = board.isWhiteToMove();
@@ -99,6 +92,9 @@ public class Position {
 			this.capturedPiece = board.getBoard()[toIndexI][toIndexJ];
 			
 		}
+		
+		this.promotedPawn = board.getBoard()[lastIndexI][lastIndexJ];
+		
 	}
 	
 	public boolean isWhiteToMove() {
@@ -170,6 +166,12 @@ public class Position {
 	public boolean isEnPassantMove() {
 		
 		return this.isEnPassantMove;
+		
+	}
+	
+	public Pieces promotedPawn() {
+		
+		return this.promotedPawn;
 		
 	}
 }
