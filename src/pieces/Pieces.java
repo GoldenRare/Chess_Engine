@@ -12,6 +12,7 @@ public abstract class Pieces {
 	protected boolean isWhite;
 	protected String pieceType;
 	protected Square square;
+	protected int pieceValue;
 	
 	public Pieces(boolean isWhite, int i, int j) {
 		
@@ -35,6 +36,12 @@ public abstract class Pieces {
 	public Square getSquare() {
 		
 		return this.square;
+		
+	}
+	
+	public int pieceValue() {
+		
+		return this.pieceValue;
 		
 	}
 	

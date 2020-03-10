@@ -17,6 +17,7 @@ public class Bishop extends Pieces {
 		
 		super(isWhite, i, j);
 		super.pieceType = "BISHOP";
+		super.pieceValue = 300;
 		
 	}
 	

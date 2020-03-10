@@ -17,6 +17,7 @@ public class Queen extends Pieces {
 		
 		super(isWhite, i, j);
 		super.pieceType = "QUEEN";
+		super.pieceValue = 900;
 		
 	}
 	

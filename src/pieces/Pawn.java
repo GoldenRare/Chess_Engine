@@ -20,6 +20,7 @@ public class Pawn extends Pieces {
 		
 		super(isWhite, i, j);
 		super.pieceType = "PAWN";
+		super.pieceValue = 100;
 		
 	}
 	

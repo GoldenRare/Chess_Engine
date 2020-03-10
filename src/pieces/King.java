@@ -11,13 +11,12 @@ import board.Square;
 import utility.Position;
 
 public class King extends Pieces {
-
-	public double value = 10; //Unsure
 	
 	public King(boolean isWhite, int i, int j) {
 		
 		super(isWhite, i, j);
 		super.pieceType = "KING";
+		super.pieceValue = 99999;
 		
 	}
 	

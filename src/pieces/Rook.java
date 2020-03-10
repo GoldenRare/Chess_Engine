@@ -17,6 +17,7 @@ public class Rook extends Pieces {
 		
 		super(isWhite, i, j);
 		super.pieceType = "ROOK";
+		super.pieceValue = 500;
 		
 	}
 	

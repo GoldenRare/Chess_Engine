@@ -17,6 +17,7 @@ public class Knight extends Pieces {
 		
 		super(isWhite, i, j);
 		super.pieceType = "KNIGHT";
+		super.pieceValue = 300;
 		
 	}
 	
