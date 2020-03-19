@@ -17,6 +17,7 @@ public class King extends Pieces {
 		super(isWhite, i, j);
 		super.pieceType = "KING";
 		super.pieceValue = 99999;
+		super.hashIndex = (isWhite) ? 5 : 11;
 		
 	}
 	
@@ -260,6 +261,7 @@ public class King extends Pieces {
 		if ((magnitudeOfMove == 1) || (magnitudeOfMove == 2)) {
 			
 			oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, false, false));
+			updatePositionHash(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
 			disableCastlingRights(lastIndexI, lastIndexJ, oldBoard);
 			updateGameBoard(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
 			this.square.setI(toIndexI);
@@ -286,6 +288,10 @@ public class King extends Pieces {
 				}
 				
 				oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, true, false, false));
+				updatePositionHash(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
+				updateRookHash(7, 7, 7, 5, oldBoard);
+				updateWhiteKingKingsideHash(oldBoard);
+				updateWhiteKingQueensideHash(oldBoard);
 				GameBoard newBoard = oldBoard;
 				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				newBoard.getBoard()[7][5] = newBoard.getBoard()[7][7];
@@ -318,6 +324,10 @@ public class King extends Pieces {
 				}
 				
 				oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, true, false));
+				updatePositionHash(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
+				updateRookHash(7, 0, 7, 3, oldBoard);
+				updateWhiteKingKingsideHash(oldBoard);
+				updateWhiteKingQueensideHash(oldBoard);
 				GameBoard newBoard = oldBoard;
 				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				newBoard.getBoard()[7][3] = newBoard.getBoard()[7][0];
@@ -354,6 +364,10 @@ public class King extends Pieces {
 				}
 				
 				oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, true, false, false));
+				updatePositionHash(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
+				updateRookHash(0, 7, 0, 5, oldBoard);
+				updateBlackKingKingsideHash(oldBoard);
+				updateBlackKingQueensideHash(oldBoard);
 				GameBoard newBoard = oldBoard;
 				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				newBoard.getBoard()[0][5] = newBoard.getBoard()[0][7];
@@ -386,6 +400,10 @@ public class King extends Pieces {
 				}
 				
 				oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, true, false));
+				updatePositionHash(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
+				updateRookHash(0, 0, 0, 3, oldBoard);
+				updateBlackKingKingsideHash(oldBoard);
+				updateBlackKingQueensideHash(oldBoard);
 				GameBoard newBoard = oldBoard;
 				newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 				newBoard.getBoard()[0][3] = newBoard.getBoard()[0][0];
@@ -412,13 +430,77 @@ public class King extends Pieces {
 	private void disableCastlingRights(int lastIndexI, int lastIndexJ, GameBoard board) {
 		if (board.getBoard()[lastIndexI][lastIndexJ].isWhite) {
 			
+			updateWhiteKingKingsideHash(board);
+			updateWhiteKingQueensideHash(board);
 			board.setCastlingRights(board.getCastlingRights() & 0b1100);
 			
 		} else {
 			
+			updateBlackKingKingsideHash(board);
+			updateBlackKingQueensideHash(board);
 			board.setCastlingRights(board.getCastlingRights() & 0b0011);
 			
 		}
+	}
+	
+	private void updateWhiteKingKingsideHash(GameBoard board) {
+		
+		if ((board.getCastlingRights() & 0b0001) == 0b0001) {
+			
+			long newPositionHash = board.getPositionHash();
+			newPositionHash ^= board.getZobristCastlingRights()[3];
+			board.setPositionHash(newPositionHash);
+			
+		}
+	}
+	
+	private void updateWhiteKingQueensideHash(GameBoard board) {
+		
+		if ((board.getCastlingRights() & 0b0010) == 0b0010) {
+			
+			long newPositionHash = board.getPositionHash();
+			newPositionHash ^= board.getZobristCastlingRights()[2];
+			board.setPositionHash(newPositionHash);
+			
+		}
+	}
+	
+	private void updateBlackKingKingsideHash(GameBoard board) {
+		
+		if ((board.getCastlingRights() & 0b0100) == 0b0100) {
+			
+			long newPositionHash = board.getPositionHash();
+			newPositionHash ^= board.getZobristCastlingRights()[1];
+			board.setPositionHash(newPositionHash);
+			
+		}
+	}
+	
+	private void updateBlackKingQueensideHash(GameBoard board) {
+		
+		if ((board.getCastlingRights() & 0b1000) == 0b1000) {
+			
+			long newPositionHash = board.getPositionHash();
+			newPositionHash ^= board.getZobristCastlingRights()[0];
+			board.setPositionHash(newPositionHash);
+			
+		}
+	}
+	
+	private void updateRookHash(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard board) {
+		
+		long newPositionHash = board.getPositionHash();
+		
+		int lastSquare = (lastIndexI * 8) + lastIndexJ;
+		int toSquare = (toIndexI * 8) + toIndexJ;
+		int hashIndex = board.getBoard()[lastIndexI][lastIndexJ].hashIndex;
+		
+		newPositionHash ^= board.getZobristBoardArray()[lastSquare][hashIndex];
+		newPositionHash ^= board.getZobristBoardArray()[toSquare][hashIndex];
+		
+		board.setPositionHash(newPositionHash);
+		
+		
 	}
 	
 	public Square getSquare() {

@@ -18,6 +18,7 @@ public class Queen extends Pieces {
 		super(isWhite, i, j);
 		super.pieceType = "QUEEN";
 		super.pieceValue = 900;
+		super.hashIndex = (isWhite) ? 4 : 10;
 		
 	}
 	
@@ -291,14 +292,12 @@ public class Queen extends Pieces {
 				}
 			}
 			
-			//if (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return false;
-			
 			oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, false, false));
+			updatePositionHash(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
 			updateGameBoard(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
 			this.square.setI(toIndexI);
 			this.square.setJ(toIndexJ);
 			
-			//row * 8 + col
 			return true;
 			
 		} else if (magnitudeOfI == magnitudeOfJ) {
@@ -366,9 +365,9 @@ public class Queen extends Pieces {
 				}
 			}
 			
-			//if (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return false;
 			
 			oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, false, false));
+			updatePositionHash(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
 			updateGameBoard(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
 			this.square.setI(toIndexI);
 			this.square.setJ(toIndexJ);

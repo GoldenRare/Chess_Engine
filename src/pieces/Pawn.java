@@ -13,14 +13,13 @@ import board_indexing.Ranks;
 import utility.Position;
 
 public class Pawn extends Pieces {
-
-	public double value = 10; //Unsure
 	
 	public Pawn(boolean isWhite, int i, int j) {
 		
 		super(isWhite, i, j);
 		super.pieceType = "PAWN";
 		super.pieceValue = 100;
+		super.hashIndex = (isWhite) ? 0 : 6;
 		
 	}
 	
@@ -352,6 +351,7 @@ public class Pawn extends Pieces {
 	public boolean makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, boolean checkPseudoMove) {return false;}
 	public boolean makeMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard oldBoard, boolean checkPseudoMove, char promotionPiece) {
 		
+		// 2) Implement enPassant hashing 
 		Square setEnPassantSquare = new Square(-1, -1);
 		
 		if ((toIndexI < 0) || (toIndexI > 7) || (toIndexJ < 0) || (toIndexJ > 7)) return false;
@@ -374,8 +374,9 @@ public class Pawn extends Pieces {
 				if ((toIndexI == enPassantSquare.getI()) && (toIndexJ == enPassantSquare.getJ())) {
 					
 					oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, false, true));
+					updatePositionHash(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
 					GameBoard newBoard = oldBoard;
-					removePiece(newBoard, lastIndexI, toIndexJ);//
+					removePiece(newBoard, lastIndexI, toIndexJ);
 					newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
 					newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
 					newBoard.getBoard()[enPassantSquare.getI() + 1][enPassantSquare.getJ()] = null;
@@ -413,6 +414,7 @@ public class Pawn extends Pieces {
 				if ((toIndexI == enPassantSquare.getI()) && (toIndexJ == enPassantSquare.getJ())) {
 					
 					oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, false, true));
+					updatePositionHash(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
 					GameBoard newBoard = oldBoard;
 					removePiece(newBoard, lastIndexI, toIndexJ);
 					newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
@@ -472,6 +474,7 @@ public class Pawn extends Pieces {
 	private boolean validMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard board,
 			Square setEnPassantSquare) {
 		board.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false, false, false));
+		updatePositionHash(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board);
 		updateBoard(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, setEnPassantSquare);
 		this.square.setI(toIndexI);
 		this.square.setJ(toIndexJ);
@@ -481,6 +484,7 @@ public class Pawn extends Pieces {
 	private boolean validPromotionMove(int lastIndexI, int lastIndexJ, int toIndexI, int toIndexJ, GameBoard board,
 			Square setEnPassantSquare, char promotionPiece) {
 		board.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false, false, false));
+		board.setPositionHash(board.getPositionHash() ^ board.getZobristBlackToMove());
 		updatePromotionBoard(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, setEnPassantSquare, promotionPiece);
 		return true;
 	}
@@ -515,11 +519,13 @@ public class Pawn extends Pieces {
 		
 		if ((jRight <= 7) && (board.getBoard()[i][jRight] != null) && (board.getBoard()[i][jRight].pieceType().equals("PAWN")) && (!board.getBoard()[i][jRight].isWhite)) {
 			
+			board.setPositionHash(board.getPositionHash() ^ board.getZobristEnPassant()[toIndexJ]);
 			setEnPassantSquare.setI(i + 1);
 			setEnPassantSquare.setJ(toIndexJ);
 			
 		} else if ((jLeft >= 0) && (board.getBoard()[i][jLeft] != null) && (board.getBoard()[i][jLeft].pieceType().equals("PAWN")) && (!board.getBoard()[i][jLeft].isWhite)) {
 			
+			board.setPositionHash(board.getPositionHash() ^ board.getZobristEnPassant()[toIndexJ]);
 			setEnPassantSquare.setI(i + 1);
 			setEnPassantSquare.setJ(toIndexJ);
 			
@@ -535,11 +541,13 @@ public class Pawn extends Pieces {
 		
 		if ((jRight <= 7) && (board.getBoard()[i][jRight] != null) && (board.getBoard()[i][jRight].pieceType().equals("PAWN")) && (board.getBoard()[i][jRight].isWhite)) {
 			
+			board.setPositionHash(board.getPositionHash() ^ board.getZobristEnPassant()[toIndexJ]);
 			setEnPassantSquare.setI(i - 1);
 			setEnPassantSquare.setJ(toIndexJ);
 			
 		} else if ((jLeft >= 0) && (board.getBoard()[i][jLeft] != null) && (board.getBoard()[i][jLeft].pieceType().equals("PAWN")) && (board.getBoard()[i][jLeft].isWhite)) {
 
+			board.setPositionHash(board.getPositionHash() ^ board.getZobristEnPassant()[toIndexJ]);
 			setEnPassantSquare.setI(i - 1);
 			setEnPassantSquare.setJ(toIndexJ);
 			
@@ -587,52 +595,62 @@ public class Pawn extends Pieces {
 	
 	private void choosePromotionPiece(int toIndexI, int toIndexJ, GameBoard board, char c) {
 		
+		int promotionSquare = (toIndexI * 8) + toIndexJ;
+		
 		switch (c) {
 		
 		case 'r':
 			
+			board.setPositionHash(board.getPositionHash() ^ board.getZobristBoardArray()[promotionSquare][9]);
 			board.getBoard()[toIndexI][toIndexJ] = new Rook(false, toIndexI, toIndexJ);
 			board.getBlackPieces().add(board.getBoard()[toIndexI][toIndexJ]);
 			break;
 			
 		case 'n':
 			
+			board.setPositionHash(board.getPositionHash() ^ board.getZobristBoardArray()[promotionSquare][7]);
 			board.getBoard()[toIndexI][toIndexJ] = new Knight(false, toIndexI, toIndexJ);
 			board.getBlackPieces().add(board.getBoard()[toIndexI][toIndexJ]);
 			break;
 			
 		case 'b':
 			
+			board.setPositionHash(board.getPositionHash() ^ board.getZobristBoardArray()[promotionSquare][8]);
 			board.getBoard()[toIndexI][toIndexJ] = new Bishop(false, toIndexI, toIndexJ);
 			board.getBlackPieces().add(board.getBoard()[toIndexI][toIndexJ]);
 			break;
 			
 		case 'q': 
 			
+			board.setPositionHash(board.getPositionHash() ^ board.getZobristBoardArray()[promotionSquare][10]);
 			board.getBoard()[toIndexI][toIndexJ] = new Queen(false, toIndexI, toIndexJ);
 			board.getBlackPieces().add(board.getBoard()[toIndexI][toIndexJ]);
 			break;	
 			
 		case 'R':
 			
+			board.setPositionHash(board.getPositionHash() ^ board.getZobristBoardArray()[promotionSquare][3]);
 			board.getBoard()[toIndexI][toIndexJ] = new Rook(true, toIndexI, toIndexJ);
 			board.getWhitePieces().add(board.getBoard()[toIndexI][toIndexJ]);
 			break;
 			
 		case 'N':
 			
+			board.setPositionHash(board.getPositionHash() ^ board.getZobristBoardArray()[promotionSquare][1]);
 			board.getBoard()[toIndexI][toIndexJ] = new Knight(true, toIndexI, toIndexJ);
 			board.getWhitePieces().add(board.getBoard()[toIndexI][toIndexJ]);
 			break;
 			
 		case 'B':
 			
+			board.setPositionHash(board.getPositionHash() ^ board.getZobristBoardArray()[promotionSquare][2]);
 			board.getBoard()[toIndexI][toIndexJ] = new Bishop(true, toIndexI, toIndexJ);
 			board.getWhitePieces().add(board.getBoard()[toIndexI][toIndexJ]);
 			break;
 			
 		case 'Q': 
 			
+			board.setPositionHash(board.getPositionHash() ^ board.getZobristBoardArray()[promotionSquare][4]);
 			board.getBoard()[toIndexI][toIndexJ] = new Queen(true, toIndexI, toIndexJ);
 			board.getWhitePieces().add(board.getBoard()[toIndexI][toIndexJ]);
 			break;

@@ -10,6 +10,7 @@ public class Position {
 	private int castlingRights; //Order of the bits: blackKingQueenside, blackKingKingside, whiteKingQueenside, whiteKingKingside
 	private int enPassantI;
 	private int enPassantJ;
+	private long positionHash;
 	private int lastIndexI;
 	private int lastIndexJ;
 	private int toIndexI;
@@ -75,6 +76,7 @@ public class Position {
 		this.castlingRights = board.getCastlingRights();
 		this.enPassantI = board.getEnPassantSquare().getI();
 		this.enPassantJ = board.getEnPassantSquare().getJ();
+		this.positionHash = board.getPositionHash();
 		this.lastIndexI = lastIndexI;
 		this.lastIndexJ = lastIndexJ;
 		this.toIndexI = toIndexI;
@@ -118,6 +120,12 @@ public class Position {
 	public int enPassantJ() {
 		
 		return this.enPassantJ;
+		
+	}
+	
+	public long positionHash() {
+		
+		return this.positionHash;
 		
 	}
 	

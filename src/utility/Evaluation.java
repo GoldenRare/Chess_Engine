@@ -10,6 +10,128 @@ import pieces.Pieces;
 
 public class Evaluation {
 
+	private Evaluation() {}
+	
+	public static final int[][] WHITE_PAWN_TABLE = { 
+			{0,  0,  0,  0,  0,  0,  0,  0},
+			{50, 50, 50, 50, 50, 50, 50, 50},
+			{10, 10, 20, 30, 30, 20, 10, 10},
+			{5,  5, 10, 25, 25, 10,  5,  5},
+			{0,  0,  0, 20, 20,  0,  0,  0},
+			{5, -5,-10,  0,  0,-10, -5,  5},
+			{5, 10, 10,-20,-20, 10, 10,  5},
+			{0,  0,  0,  0,  0,  0,  0,  0}};
+	
+	public static final int[][] BLACK_PAWN_TABLE = { 
+			{0,  0,  0,  0,  0,  0,  0,  0},
+			{5, 10, 10,-20,-20, 10, 10,  5},
+			{5, -5,-10,  0,  0,-10, -5,  5},
+			{0,  0,  0, 20, 20,  0,  0,  0},
+			{5,  5, 10, 25, 25, 10,  5,  5},
+			{10, 10, 20, 30, 30, 20, 10, 10},
+			{50, 50, 50, 50, 50, 50, 50, 50},
+			{0,  0,  0,  0,  0,  0,  0,  0}};
+	
+	public static final int[][] WHITE_KNIGHT_TABLE = {
+			{-50,-40,-30,-30,-30,-30,-40,-50},
+			{-40,-20,  0,  0,  0,  0,-20,-40},
+			{-30,  0, 10, 15, 15, 10,  0,-30},
+			{-30,  5, 15, 20, 20, 15,  5,-30},
+			{-30,  0, 15, 20, 20, 15,  0,-30},
+			{-30,  5, 10, 15, 15, 10,  5,-30},
+			{-40,-20,  0,  5,  5,  0,-20,-40},
+			{-50,-40,-30,-30,-30,-30,-40,-50}};
+	
+	public static final int[][] BLACK_KNIGHT_TABLE = {
+			{-50,-40,-30,-30,-30,-30,-40,-50},
+			{-40,-20,  0,  5,  5,  0,-20,-40},
+			{-30,  5, 10, 15, 15, 10,  5,-30},
+			{-30,  0, 15, 20, 20, 15,  0,-30},
+			{-30,  5, 15, 20, 20, 15,  5,-30},
+			{-30,  0, 10, 15, 15, 10,  0,-30},
+			{-40,-20,  0,  0,  0,  0,-20,-40},
+			{-50,-40,-30,-30,-30,-30,-40,-50}};
+	
+	public static final int[][] WHITE_BISHOP_TABLE = {
+			{-20,-10,-10,-10,-10,-10,-10,-20},
+			{-10,  0,  0,  0,  0,  0,  0,-10},
+			{-10,  0,  5, 10, 10,  5,  0,-10},
+			{-10,  5,  5, 10, 10,  5,  5,-10},
+			{-10,  0, 10, 10, 10, 10,  0,-10},
+			{-10, 10, 10, 10, 10, 10, 10,-10},
+			{-10,  5,  0,  0,  0,  0,  5,-10},
+			{-20,-10,-10,-10,-10,-10,-10,-20}};
+	
+	public static final int[][] BLACK_BISHOP_TABLE = {
+			{-20,-10,-10,-10,-10,-10,-10,-20},
+			{-10,  5,  0,  0,  0,  0,  5,-10},
+			{-10, 10, 10, 10, 10, 10, 10,-10},
+			{-10,  0, 10, 10, 10, 10,  0,-10},
+			{-10,  5,  5, 10, 10,  5,  5,-10},
+			{-10,  0,  5, 10, 10,  5,  0,-10},
+			{-10,  0,  0,  0,  0,  0,  0,-10},
+			{-20,-10,-10,-10,-10,-10,-10,-20}};
+	
+	public static final int[][] WHITE_ROOK_TABLE = {
+			{0,  0,  0,  0,  0,  0,  0,  0},
+			{5, 10, 10, 10, 10, 10, 10,  5},
+			{-5,  0,  0,  0,  0,  0,  0, -5},
+			{-5,  0,  0,  0,  0,  0,  0, -5},
+			{-5,  0,  0,  0,  0,  0,  0, -5},
+			{-5,  0,  0,  0,  0,  0,  0, -5},
+			{-5,  0,  0,  0,  0,  0,  0, -5},
+			{0,  0,  0,  5,  5,  0,  0,  0}};
+	
+	public static final int[][] BLACK_ROOK_TABLE = {
+			{0,  0,  0,  5,  5,  0,  0,  0},
+			{-5,  0,  0,  0,  0,  0,  0, -5},
+			{-5,  0,  0,  0,  0,  0,  0, -5},
+			{-5,  0,  0,  0,  0,  0,  0, -5},
+			{-5,  0,  0,  0,  0,  0,  0, -5},
+			{-5,  0,  0,  0,  0,  0,  0, -5},
+			{5, 10, 10, 10, 10, 10, 10,  5},
+			{0,  0,  0,  0,  0,  0,  0,  0}};
+	
+	public static final int[][] WHITE_QUEEN_TABLE = {
+			{-20,-10,-10, -5, -5,-10,-10,-20},
+			{-10,  0,  0,  0,  0,  0,  0,-10},
+			{-10,  0,  5,  5,  5,  5,  0,-10},
+			{-5,  0,  5,  5,  5,  5,  0, -5},
+			{0,  0,  5,  5,  5,  5,  0, -5},
+			{-10,  5,  5,  5,  5,  5,  0,-10},
+			{-10,  0,  5,  0,  0,  0,  0,-10},
+			{-20,-10,-10, -5, -5,-10,-10,-20}};
+	
+	public static final int[][] BLACK_QUEEN_TABLE = {
+			{-20,-10,-10, -5, -5,-10,-10,-20},
+			{-10,  0,  5,  0,  0,  0,  0,-10},
+			{-10,  5,  5,  5,  5,  5,  0,-10},
+			{0,  0,  5,  5,  5,  5,  0, -5},
+			{-5,  0,  5,  5,  5,  5,  0, -5},
+			{-10,  0,  5,  5,  5,  5,  0,-10},
+			{-10,  0,  0,  0,  0,  0,  0,-10},
+			{-20,-10,-10, -5, -5,-10,-10,-20}};
+	
+	//Middle Game
+	public static final int[][] WHITE_KING_TABLE = {
+			{-30,-40,-40,-50,-50,-40,-40,-30},
+			{-30,-40,-40,-50,-50,-40,-40,-30},
+			{-30,-40,-40,-50,-50,-40,-40,-30},
+			{-30,-40,-40,-50,-50,-40,-40,-30},
+			{-20,-30,-30,-40,-40,-30,-30,-20},
+			{-10,-20,-20,-20,-20,-20,-20,-10},
+			{20, 20,  0,  0,  0,  0, 20, 20},
+			{20, 30, 10,  0,  0, 10, 30, 20}};
+	
+	public static final int[][] BLACK_KING_TABLE = {
+			{20, 30, 10,  0,  0, 10, 30, 20},
+			{20, 20,  0,  0,  0,  0, 20, 20},
+			{-10,-20,-20,-20,-20,-20,-20,-10},
+			{-20,-30,-30,-40,-40,-30,-30,-20},
+			{-30,-40,-40,-50,-50,-40,-40,-30},
+			{-30,-40,-40,-50,-50,-40,-40,-30},
+			{-30,-40,-40,-50,-50,-40,-40,-30},
+			{-30,-40,-40,-50,-50,-40,-40,-30}};
 	
 	public static int miniMax(GameBoard board, int depth, boolean isMaximizingPlayer) {
 		
@@ -95,26 +217,6 @@ public class Evaluation {
 		
 		if (isMaximizingPlayer) {
 			
-			if (movesList.size() == 0) {
-				
-				int evaluation = 0;
-				if (Square.isSquareAttacked(board, board.getKingPieces()[0].getSquare(), isMaximizingPlayer)) {
-					
-					evaluation = Integer.MIN_VALUE + depth;
-		
-				}
-				
-				if (evaluation >= beta) {
-					return beta;
-					
-				}
-
-				if (evaluation > alpha) {
-					alpha = evaluation;
-				}
-				
-				return alpha;
-			}
 			for (int i = 0; i < movesList.size(); i++) {
 				
 				int lastIndexI = movesList.get(i).getPiece().getSquare().getI();
@@ -151,27 +253,6 @@ public class Evaluation {
 					bestMove.getToIndexI() + " " + bestMove.getToIndexJ() + " " + bestMove.getPromotionPiece());
 			return alpha;
 		} else {
-			
-			if (movesList.size() == 0) {
-				
-				int evaluation = 0;
-				if (Square.isSquareAttacked(board, board.getKingPieces()[1].getSquare(), isMaximizingPlayer)) {
-					
-					evaluation = Integer.MAX_VALUE - depth;
-		
-				}
-				
-				if (evaluation <= alpha) {
-					return alpha;
-					
-				}
-
-				if (evaluation < beta) {
-					beta = evaluation;
-				}
-				
-				return beta;
-			}
 			
 			for (int i = 0; i < movesList.size(); i++) {
 				
@@ -212,28 +293,12 @@ public class Evaluation {
 	}
 	
 	public static int evaluatePosition(GameBoard board) {
+	
+		return materialEvaluation(board);
 		
-		int whiteMaterial = 0;
-		int blackMaterial = 0;
-		int totalMaterial = 0;
-		
-		for (Pieces piece : board.getWhitePieces()) {
-			
-			whiteMaterial += piece.pieceValue();
-			
-		}
-		
-		for (Pieces piece : board.getBlackPieces()) {
-			
-			blackMaterial += piece.pieceValue();
-			
-		}
-		
-		totalMaterial = whiteMaterial - blackMaterial;
-		
-		return totalMaterial; 
-
 	}
+
+
 	
 	public static long Perft(int depth, GameBoard board) {
 		
@@ -241,7 +306,7 @@ public class Evaluation {
 		
 		List<Move> movesList = Move.GenerateLegalMoves(board);
 		long nodes = 0;
-		
+
 		for (int i = 0; i < movesList.size(); i++) {
 			
 			int lastIndexI = movesList.get(i).getPiece().getSquare().getI();
@@ -263,18 +328,61 @@ public class Evaluation {
 			
 			nodes += Perft(depth - 1, board);
 			board.undoMove();
-			
 		}
 		
 		return nodes;
 	}
 	
+	private static int materialEvaluation(GameBoard board) {
+		
+		int whiteMaterial = 0;
+		int blackMaterial = 0;
+		int totalMaterial = 0;
+		
+		for (Pieces whitePiece : board.getWhitePieces()) {
+			
+			int i = whitePiece.getSquare().getI();
+			int j = whitePiece.getSquare().getJ();
+			
+			whiteMaterial += whitePiece.pieceValue();
+			
+			if (whitePiece.pieceType().equals("PAWN")) whiteMaterial += Evaluation.WHITE_PAWN_TABLE[i][j];
+			if (whitePiece.pieceType().equals("KNIGHT")) whiteMaterial += Evaluation.WHITE_KNIGHT_TABLE[i][j];
+			if (whitePiece.pieceType().equals("BISHOP")) whiteMaterial += Evaluation.WHITE_BISHOP_TABLE[i][j];
+			if (whitePiece.pieceType().equals("ROOK")) whiteMaterial += Evaluation.WHITE_ROOK_TABLE[i][j];
+			if (whitePiece.pieceType().equals("QUEEN")) whiteMaterial += Evaluation.WHITE_QUEEN_TABLE[i][j];
+			if (whitePiece.pieceType().equals("KING")) whiteMaterial += Evaluation.WHITE_KING_TABLE[i][j];
+			
+		}
+		
+		for (Pieces blackPiece : board.getBlackPieces()) {
+			
+			int i = blackPiece.getSquare().getI();
+			int j = blackPiece.getSquare().getJ();
+			
+			blackMaterial += blackPiece.pieceValue();
+			
+			if (blackPiece.pieceType().equals("PAWN")) blackMaterial += Evaluation.BLACK_PAWN_TABLE[i][j];
+			if (blackPiece.pieceType().equals("KNIGHT")) blackMaterial += Evaluation.BLACK_KNIGHT_TABLE[i][j];
+			if (blackPiece.pieceType().equals("BISHOP")) blackMaterial += Evaluation.BLACK_BISHOP_TABLE[i][j];
+			if (blackPiece.pieceType().equals("ROOK")) blackMaterial += Evaluation.BLACK_ROOK_TABLE[i][j];
+			if (blackPiece.pieceType().equals("QUEEN")) blackMaterial += Evaluation.BLACK_QUEEN_TABLE[i][j];
+			if (blackPiece.pieceType().equals("KING")) blackMaterial += Evaluation.BLACK_KING_TABLE[i][j];
+			
+		}
+		
+		totalMaterial = whiteMaterial - blackMaterial;
+		
+		return totalMaterial;
+		
+	}
+	
 	public static void main(String[] args) {
 		
-		GameBoard b = new GameBoard("1rbk1n1r/pp1p1P1p/1qpPpR2/6QP/2P1N3/P1B5/1P2BP2/2K4R w - - 1 29");
+		GameBoard b = new GameBoard();
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(6, b)));
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(miniMax(b, 6, b.isWhiteToMove())));
-		System.out.println(NumberFormat.getNumberInstance(Locale.US).format(alphaBeta(b, Integer.MIN_VALUE, Integer.MAX_VALUE, 2, b.isWhiteToMove())));
+		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(alphaBeta(b, Integer.MIN_VALUE, Integer.MAX_VALUE, 6, b.isWhiteToMove())));
 		
 		GameBoard c = new GameBoard("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(5, c)));
@@ -293,7 +401,7 @@ public class Evaluation {
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(miniMax(f, 5, f.isWhiteToMove())));
 		
 		GameBoard g = new GameBoard("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8");
-		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(5, g)));
+		System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(5, g)));
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(miniMax(g, 5, g.isWhiteToMove())));
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(alphaBeta(g, Integer.MIN_VALUE, Integer.MAX_VALUE, 5, g.isWhiteToMove())));
 		

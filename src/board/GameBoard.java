@@ -1,5 +1,6 @@
 package board;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +22,6 @@ public class GameBoard {
 	private int castlingRights; //Order of the bits: blackKingQueenside, blackKingKingside, whiteKingQueenside, whiteKingKingside
 	private Square enPassant; 
 	private Stack<Position> previousGameStates;
-	
 	////////////////
 	private Pieces[] kingPieces; //WhiteKing, BlackKing
 	private List<Pieces> whitePieces;
@@ -30,16 +30,26 @@ public class GameBoard {
 	private int parseFenI;
 	private int parseFenJ;
 	///////////////
+	private long[][] zobristBoardArray;
+	private long zobristBlackToMove;
+	private long[] zobristCastlingRights; //Order of the array: blackKingQueenside, blackKingKingside, whiteKingQueenside, whiteKingKingside
+	private long[] zobristEnPassant;
+	///////////////
+	private long positionHash;
 	
 	public GameBoard() {
 		
 		startGame();
+		zobristHashing();
+		hashPosition();
 		
 	}
 	
 	public GameBoard(String fen) {
 		
 		parseFen(fen);
+		zobristHashing();
+		hashPosition();
 		
 	}
 	
@@ -297,6 +307,7 @@ public class GameBoard {
 		this.castlingRights = restorePosition.castlingRights();
 		this.enPassant.setI(restorePosition.enPassantI());
 		this.enPassant.setJ(restorePosition.enPassantJ());
+		this.positionHash = restorePosition.positionHash();
 		
 		if (isPromotionMove(restorePosition)) {
 			
@@ -312,8 +323,8 @@ public class GameBoard {
 			
 		}
 	
-		if (restorePosition.castlingKingSide()) restoreKingSideRook(restorePosition.lastIndexI(), restorePosition.lastIndexJ()); //TODO
-		if (restorePosition.castlingQueenSide()) restoreQueenSideRook(restorePosition.lastIndexI(), restorePosition.lastIndexJ()); //TODO
+		if (restorePosition.castlingKingSide()) restoreKingSideRook(restorePosition.lastIndexI(), restorePosition.lastIndexJ());
+		if (restorePosition.castlingQueenSide()) restoreQueenSideRook(restorePosition.lastIndexI(), restorePosition.lastIndexJ()); 
 		
 		if (restorePosition.isEnPassantMove()) {
 			
@@ -339,6 +350,61 @@ public class GameBoard {
 		
 		//System.out.print(Arrays.deepToString(this.board).replace("], ", "]\n"));
 		//System.out.println("\n");
+	}
+	
+	private void zobristHashing() {
+		
+		SecureRandom random = new SecureRandom();
+		
+		this.zobristBoardArray = new long[64][12];
+		this.zobristBlackToMove = random.nextLong();
+		this.zobristCastlingRights = new long[4];
+		this.zobristEnPassant = new long[8];
+
+		
+		for (int i = 0; i < 64; i++) {
+			for (int j = 0; j < 12; j++) {
+				
+				this.zobristBoardArray[i][j] = random.nextLong();
+				
+			}
+		}
+	
+		for (int i = 0; i < 4; i++) this.zobristCastlingRights[i] = random.nextLong();
+		for (int i = 0; i < 8; i++) this.zobristEnPassant[i] = random.nextLong();
+	}
+	
+	private void hashPosition() {
+		
+		this.positionHash = 0;
+		
+		for (Pieces whitePiece : this.whitePieces) {
+			
+			int square = (whitePiece.getSquare().getI() * 8) + whitePiece.getSquare().getJ();
+			int hashIndex = whitePiece.hashIndex();
+			
+			this.positionHash ^= this.zobristBoardArray[square][hashIndex];
+			
+		}
+		
+		for (Pieces blackPiece : this.blackPieces) {
+			
+			int square = (blackPiece.getSquare().getI() * 8) + blackPiece.getSquare().getJ();
+			int hashIndex = blackPiece.hashIndex();
+			
+			this.positionHash ^= this.zobristBoardArray[square][hashIndex];
+			
+		}
+		
+		if (!this.isWhiteToMove) this.positionHash ^= this.zobristBlackToMove;
+		
+		if ((this.castlingRights & 0b0001) == 0b0001) this.positionHash ^= this.zobristCastlingRights[3];
+		if ((this.castlingRights & 0b0010) == 0b0010) this.positionHash ^= this.zobristCastlingRights[2];
+		if ((this.castlingRights & 0b0100) == 0b0100) this.positionHash ^= this.zobristCastlingRights[1];
+		if ((this.castlingRights & 0b1000) == 0b1000) this.positionHash ^= this.zobristCastlingRights[0];
+		
+		if (this.enPassant.getJ() != -1) this.positionHash ^= this.zobristEnPassant[this.enPassant.getJ()];
+		
 	}
 
 	private boolean isPromotionMove(Position restorePosition) {
@@ -448,6 +514,42 @@ public class GameBoard {
 		
 	}
 	
+	public long getPositionHash() {
+		
+		return this.positionHash;
+		
+	}
+	
+	public void setPositionHash(long positionHash) {
+		
+		this.positionHash = positionHash;
+		
+	}
+	
+	public long[][] getZobristBoardArray() {
+		
+		return this.zobristBoardArray;
+		
+	}
+
+	public long getZobristBlackToMove() {
+		
+		return this.zobristBlackToMove;
+		
+	}
+
+	public long[] getZobristCastlingRights() {
+		
+		return this.zobristCastlingRights;
+		
+	}
+
+	public long[] getZobristEnPassant() {
+		
+		return this.zobristEnPassant;
+		
+	}
+
 	private void restoreKingSideRook(int lastIndexI, int lastIndexJ) {
 		
 		if (this.board[lastIndexI][lastIndexJ].getColour() == true) {
@@ -488,10 +590,17 @@ public class GameBoard {
 	
 	public static void main(String[] args) {
 		
-		GameBoard b = new GameBoard("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
-		System.out.print(Arrays.deepToString(b.getBoard()).replace("], ", "]\n"));
-		System.out.println(b.isWhiteToMove);
+		GameBoard b = new GameBoard();
+		
+		System.out.println(b.getPositionHash());
+		b.getBoard()[7][6].makeMove(7, 6, 5, 5, b, false);
+		System.out.println(b.getPositionHash());
+		b.getBoard()[0][6].makeMove(0, 6, 2, 5, b, false);
+		System.out.println(b.getPositionHash());
+		b.getBoard()[5][5].makeMove(5, 5, 7, 6, b, false);
+		System.out.println(b.getPositionHash());
+		b.getBoard()[2][5].makeMove(2, 5, 0, 6, b, false);
+		System.out.println(b.getPositionHash());
 		
 	}
-
 }

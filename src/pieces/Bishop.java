@@ -18,6 +18,7 @@ public class Bishop extends Pieces {
 		super(isWhite, i, j);
 		super.pieceType = "BISHOP";
 		super.pieceValue = 300;
+		super.hashIndex = (isWhite) ? 2 : 8;
 		
 	}
 	
@@ -225,6 +226,7 @@ public class Bishop extends Pieces {
 			//if (Position.isMyKingInCheck(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard)) return false;
 			
 			oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, false, false));
+			updatePositionHash(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
 			updateGameBoard(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
 			this.square.setI(toIndexI);
 			this.square.setJ(toIndexJ);

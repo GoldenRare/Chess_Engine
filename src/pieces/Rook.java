@@ -18,6 +18,7 @@ public class Rook extends Pieces {
 		super(isWhite, i, j);
 		super.pieceType = "ROOK";
 		super.pieceValue = 500;
+		super.hashIndex = (isWhite) ? 3 : 9;
 		
 	}
 	
@@ -229,10 +230,12 @@ public class Rook extends Pieces {
 			if (oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
 				if ((lastIndexI == 7) && (lastIndexJ == 7)) {
 					
+					updateWhiteKingKingsideHash(oldBoard);
 					oldBoard.setCastlingRights(oldBoard.getCastlingRights() & 0b1110);
 					
 				} else if ((lastIndexI == 7) && (lastIndexJ == 0)) {
 					
+					updateWhiteKingQueensideHash(oldBoard);
 					oldBoard.setCastlingRights(oldBoard.getCastlingRights() & 0b1101);
 					
 				}
@@ -240,26 +243,70 @@ public class Rook extends Pieces {
 			} else if (!oldBoard.getBoard()[lastIndexI][lastIndexJ].isWhite) {
 				if ((lastIndexI == 0) && (lastIndexJ == 7)) {
 					
+					updateBlackKingKingsideHash(oldBoard);
 					oldBoard.setCastlingRights(oldBoard.getCastlingRights() & 0b1011);
 					
 				} else if ((lastIndexI == 0) && (lastIndexJ == 0)) {
 					
+					updateBlackKingQueensideHash(oldBoard);
 					oldBoard.setCastlingRights(oldBoard.getCastlingRights() & 0b0111);
 					
 				}
 			}
 			
+			updatePositionHash(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
 			updateGameBoard(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard);
 			this.square.setI(toIndexI);
 			this.square.setJ(toIndexJ);
 			
-			//row * 8 + col
 			return true;
 			
 		}
-		
-		//row * 8 + col
 		return false;
 		
+	}
+	
+	private void updateWhiteKingKingsideHash(GameBoard board) {
+		
+		if ((board.getCastlingRights() & 0b0001) == 0b0001) {
+			
+			long newPositionHash = board.getPositionHash();
+			newPositionHash ^= board.getZobristCastlingRights()[3];
+			board.setPositionHash(newPositionHash);
+			
+		}
+	}
+	
+	private void updateWhiteKingQueensideHash(GameBoard board) {
+		
+		if ((board.getCastlingRights() & 0b0010) == 0b0010) {
+			
+			long newPositionHash = board.getPositionHash();
+			newPositionHash ^= board.getZobristCastlingRights()[2];
+			board.setPositionHash(newPositionHash);
+			
+		}
+	}
+	
+	private void updateBlackKingKingsideHash(GameBoard board) {
+		
+		if ((board.getCastlingRights() & 0b0100) == 0b0100) {
+			
+			long newPositionHash = board.getPositionHash();
+			newPositionHash ^= board.getZobristCastlingRights()[1];
+			board.setPositionHash(newPositionHash);
+			
+		}
+	}
+	
+	private void updateBlackKingQueensideHash(GameBoard board) {
+		
+		if ((board.getCastlingRights() & 0b1000) == 0b1000) {
+			
+			long newPositionHash = board.getPositionHash();
+			newPositionHash ^= board.getZobristCastlingRights()[0];
+			board.setPositionHash(newPositionHash);
+			
+		}
 	}
 }
