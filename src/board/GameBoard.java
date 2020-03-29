@@ -3,6 +3,7 @@ package board;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
@@ -13,6 +14,7 @@ import pieces.Pawn;
 import pieces.Pieces;
 import pieces.Queen;
 import pieces.Rook;
+import utility.Evaluation;
 import utility.Position;
 
 public class GameBoard {
@@ -36,6 +38,8 @@ public class GameBoard {
 	private long[] zobristEnPassant;
 	///////////////
 	private long positionHash;
+	///////////////
+	private HashMap<Long, Evaluation> transpositionTable = new HashMap<Long, Evaluation>();
 	
 	public GameBoard() {
 		
@@ -547,6 +551,12 @@ public class GameBoard {
 	public long[] getZobristEnPassant() {
 		
 		return this.zobristEnPassant;
+		
+	}
+
+	public HashMap<Long, Evaluation> getTranspositionTable() {
+		
+		return this.transpositionTable;
 		
 	}
 

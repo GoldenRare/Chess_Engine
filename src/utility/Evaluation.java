@@ -1,8 +1,11 @@
 package utility;
 
 import java.text.NumberFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import board.GameBoard;
 import board.Square;
@@ -10,8 +13,21 @@ import pieces.Pieces;
 
 public class Evaluation {
 
-	private Evaluation() {}
+	private long positionKey;
+	private Move bestMove;
+	private int depth;
+	private boolean isCheckmate;
 	
+	public Evaluation(long positionKey, Move bestMove, int depth, boolean isCheckmate) {
+		
+		this.positionKey = positionKey;
+		this.bestMove = bestMove;
+		this.depth = depth;
+		this.isCheckmate = isCheckmate;
+		
+	}
+	
+	public static final int MATE_SCORE = 999999;
 	public static final int[][] WHITE_PAWN_TABLE = { 
 			{0,  0,  0,  0,  0,  0,  0,  0},
 			{50, 50, 50, 50, 50, 50, 50, 50},
@@ -248,9 +264,9 @@ public class Evaluation {
 					bestMove = movesList.get(i);
 				}
 			}
-			if (bestMove != null)
-			System.out.println(bestMove.getPiece().getSquare().getI() + " " + bestMove.getPiece().getSquare().getJ() + " " + 
-					bestMove.getToIndexI() + " " + bestMove.getToIndexJ() + " " + bestMove.getPromotionPiece());
+			//if (bestMove != null)
+			//System.out.println(bestMove.getPiece().getSquare().getI() + " " + bestMove.getPiece().getSquare().getJ() + " " + 
+					//bestMove.getToIndexI() + " " + bestMove.getToIndexJ() + " " + bestMove.getPromotionPiece());
 			return alpha;
 		} else {
 			
@@ -284,16 +300,135 @@ public class Evaluation {
 					bestMove = movesList.get(i);
 				}	
 			}
-			if (bestMove != null)
-			System.out.println(bestMove.getPiece().getSquare().getI() + " " + bestMove.getPiece().getSquare().getJ() + " " + 
-					bestMove.getToIndexI() + " " + bestMove.getToIndexJ() + " " + bestMove.getPromotionPiece());
+			//if (bestMove != null)
+			//System.out.println(bestMove.getPiece().getSquare().getI() + " " + bestMove.getPiece().getSquare().getJ() + " " + 
+					//bestMove.getToIndexI() + " " + bestMove.getToIndexJ() + " " + bestMove.getPromotionPiece());
 			return beta;
 		}
 		
 	}
 	
+	public static int alphaBetaIterativeDeepening(GameBoard board, int alpha, int beta, int depth, boolean isMaximizingPlayer) {
+		
+		if (depth == 0) return evaluatePosition(board);
+		List<Move> movesList = Move.GenerateLegalMoves(board);
+		Move bestMove = null;
+		boolean isCheckmate = false;
+
+		/////////////////
+		boolean storePVMove = true;
+		Map<Long, Evaluation> transpositionTable = board.getTranspositionTable();
+		long key = board.getPositionHash();
+		
+		if (transpositionTable.containsKey(key) && transpositionTable.get(key).positionKey == key) {
+			
+			Evaluation eval = transpositionTable.get(key);
+			bestMove = eval.bestMove;
+			if (depth <= eval.depth) storePVMove = false; //Could just return evaluation
+		
+		}
+		
+		if (bestMove != null) {
+			
+			int index = movesList.indexOf(bestMove);
+			if (index != -1) {
+				Move temp = movesList.get(0);
+				movesList.set(0, bestMove);
+				movesList.set(index, temp);
+			}
+		}
+		if (isMaximizingPlayer) {
+			
+			for (int i = 0; i < movesList.size(); i++) {
+				
+				int lastIndexI = movesList.get(i).getPiece().getSquare().getI();
+				int lastIndexJ = movesList.get(i).getPiece().getSquare().getJ();
+				int toIndexI = movesList.get(i).getToIndexI();
+				int toIndexJ = movesList.get(i).getToIndexJ();
+				char promotionPiece = movesList.get(i).getPromotionPiece();
+					
+				if (movesList.get(i).getPiece().pieceType().equals("PAWN")) {
+						
+					movesList.get(i).getPiece().makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false, promotionPiece);
+						
+				} else {
+						
+					movesList.get(i).getPiece().makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false);
+						
+				}
+			
+				int evaluation = alphaBetaIterativeDeepening(board, alpha, beta, depth - 1, !isMaximizingPlayer);
+				board.undoMove();
+				
+				if (evaluation >= beta) {
+					return beta;
+					
+				}
+
+				if (evaluation > alpha) {
+					alpha = evaluation;
+					if (alpha == MATE_SCORE) isCheckmate = true;
+					if (i != -1) bestMove = movesList.get(i);
+				}
+			}
+			
+			if ((bestMove != null) && (storePVMove)) transpositionTable.put(key, new Evaluation(key, bestMove, depth, isCheckmate));
+			return alpha;
+		} else {
+			
+			for (int i = 0; i < movesList.size(); i++) {
+				
+				int lastIndexI = movesList.get(i).getPiece().getSquare().getI();
+				int lastIndexJ = movesList.get(i).getPiece().getSquare().getJ();
+				int toIndexI = movesList.get(i).getToIndexI();
+				int toIndexJ = movesList.get(i).getToIndexJ();
+				char promotionPiece = movesList.get(i).getPromotionPiece();
+					
+				if (movesList.get(i).getPiece().pieceType().equals("PAWN")) {
+						
+					movesList.get(i).getPiece().makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false, promotionPiece);
+						
+				} else {
+						
+					movesList.get(i).getPiece().makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false);
+						
+				}
+	
+				int evaluation = alphaBetaIterativeDeepening(board, alpha, beta, depth - 1, !isMaximizingPlayer);
+				board.undoMove();
+				if (evaluation <= alpha) {
+					return alpha;
+				}
+				
+				if (evaluation < beta) {
+					
+					beta = evaluation;
+					if (beta == -MATE_SCORE) isCheckmate = true;
+					if (i != -1) bestMove = movesList.get(i);
+				}	
+			}
+			if ((bestMove != null) && (storePVMove)) transpositionTable.put(key, new Evaluation(key, bestMove, depth, isCheckmate));
+			return beta;
+		}
+		
+	}
+	
+	public static void iterativeDeepening(GameBoard board, int depthMax) {
+		
+		for (int depth = 1; depth < depthMax; depth++) {
+			
+			alphaBetaIterativeDeepening(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, board.isWhiteToMove());
+			Move bestMove = board.getTranspositionTable().get(board.getPositionHash()).bestMove;
+			System.out.println(bestMove.getPiece().getSquare().getI() + " " + bestMove.getPiece().getSquare().getJ() + " " + 
+					bestMove.getToIndexI() + " " + bestMove.getToIndexJ() + " " + bestMove.getPromotionPiece());
+			if (board.getTranspositionTable().get(board.getPositionHash()).isCheckmate) break;
+			
+		}
+	}
+	
 	public static int evaluatePosition(GameBoard board) {
 	
+		if (isCheckmate(board)) return (!board.isWhiteToMove()) ? MATE_SCORE : -MATE_SCORE;
 		return materialEvaluation(board);
 		
 	}
@@ -377,12 +512,42 @@ public class Evaluation {
 		
 	}
 	
-	public static void main(String[] args) {
+	private static boolean isCheckmate(GameBoard board) {
 		
-		GameBoard b = new GameBoard();
+		boolean result = false;
+		if (Move.GenerateLegalMoves(board).isEmpty()) {
+			int i, j;
+			if (board.isWhiteToMove()) {
+				
+				i = board.getKingPieces()[0].getSquare().getI();
+				j = board.getKingPieces()[0].getSquare().getJ();
+				if (Square.isSquareAttacked(board, new Square(i, j), true)) result = true;
+				
+			} else {
+				
+				i = board.getKingPieces()[1].getSquare().getI();
+				j = board.getKingPieces()[1].getSquare().getJ();
+				if (Square.isSquareAttacked(board, new Square(i, j), false)) result = true;
+			}
+		}
+		return result;
+	}
+	
+	public static void main(String[] args) {
+		//7K/P1p1p1p1/2P1P1Pk/6pP/3p2P1/1P6/3P4/8 w - - 0 1
+		GameBoard b = new GameBoard("r5k1/pR4pp/2p1b3/8/r4p2/2K2P2/5P1P/8 b - - 0 5");
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(6, b)));
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(miniMax(b, 6, b.isWhiteToMove())));
-		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(alphaBeta(b, Integer.MIN_VALUE, Integer.MAX_VALUE, 6, b.isWhiteToMove())));
+		Instant start = Instant.now();
+		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(alphaBeta(b, Integer.MIN_VALUE, Integer.MAX_VALUE, 5, b.isWhiteToMove())));
+		Instant finish = Instant.now();
+		long timeElapsed = Duration.between(start, finish).toSeconds();
+		System.out.println("Algorithm took " + timeElapsed + " seconds.\n");
+		start = Instant.now();
+		iterativeDeepening(b, 50);
+		finish = Instant.now();
+		timeElapsed = Duration.between(start, finish).toSeconds();
+		System.out.println("Algorithm took " + timeElapsed + " seconds.\n");
 		
 		GameBoard c = new GameBoard("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(5, c)));
@@ -401,7 +566,7 @@ public class Evaluation {
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(miniMax(f, 5, f.isWhiteToMove())));
 		
 		GameBoard g = new GameBoard("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8");
-		System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(5, g)));
+		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(5, g)));
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(miniMax(g, 5, g.isWhiteToMove())));
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(alphaBeta(g, Integer.MIN_VALUE, Integer.MAX_VALUE, 5, g.isWhiteToMove())));
 		

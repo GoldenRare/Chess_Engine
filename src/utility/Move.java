@@ -39,7 +39,7 @@ public class Move {
 		List<Move> movesList = new ArrayList<Move>();
 		List<Pieces> whitePieces = new ArrayList<Pieces>(board.getWhitePieces());
 		List<Pieces> blackPieces = new ArrayList<Pieces>(board.getBlackPieces());
-		//System.out.println(blackPieces);
+		
 		if (board.isWhiteToMove()) {
 			
 			for (Pieces whitePiece : whitePieces) {
@@ -495,6 +495,39 @@ public class Move {
         System.out.println("Total: " + total);
 		
 		
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		
+		if (this == obj) {
+
+			return true;
+
+		}
+
+		if (obj == null) {
+
+			return false;
+
+		}
+
+		if (this.getClass() != obj.getClass()) {
+
+			return false;
+
+		}
+		
+		Move other = (Move) obj;
+		
+		if ((this.piece != other.piece) || (this.toIndexI != other.toIndexI) || (this.toIndexJ != other.toIndexJ)
+				|| (this.promotionPiece != other.promotionPiece)) {
+			
+			return false;
+			
+		}
+		
+		return true;
 	}
 
 	public Pieces getPiece() {
