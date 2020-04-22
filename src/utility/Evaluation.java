@@ -3,6 +3,7 @@ package utility;
 import java.text.NumberFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -28,6 +29,9 @@ public class Evaluation {
 	}
 	
 	public static final int MATE_SCORE = 999999;
+	public static final int INFINITE = 1000000;
+	
+	//Table scores influenced by CPW (Chess Programming Wiki - Engine)
 	public static final int[][] WHITE_PAWN_TABLE = { 
 			{0,  0,  0,  0,  0,  0,  0,  0},
 			{50, 50, 50, 50, 50, 50, 50, 50},
@@ -148,6 +152,15 @@ public class Evaluation {
 			{-30,-40,-40,-50,-50,-40,-40,-30},
 			{-30,-40,-40,-50,-50,-40,-40,-30},
 			{-30,-40,-40,-50,-50,-40,-40,-30}};
+	
+	// Scores influenced by Stockfish v11
+	// Only middle game scores
+	public static final int[][] MOBILITY_SCORE = {
+			{-62, -53, -12, -4, 3, 13, 22, 28, 33}, //Knights mobility score
+			{-48, -20, 16, 26, 38, 51, 55, 63, 63, 68, 81, 81, 91, 98}, // Bishops mobility score
+			{-58, -27, -15, -10, -5, -2, 9, 16, 30, 31, 32, 38, 46, 48, 58}, // Rooks mobility score
+			{-39, -21, 3, 3, 14, 22, 28, 41, 43, 48, 56, 60, 60, 66, 67, 70, 71, 73, 79, 88, 88, 99, 102, 102, 106, 109, 113, 116} // Queens mobility score
+	};
 	
 	public static int miniMax(GameBoard board, int depth, boolean isMaximizingPlayer) {
 		
@@ -308,10 +321,16 @@ public class Evaluation {
 		
 	}
 	
-	public static int alphaBetaIterativeDeepening(GameBoard board, int alpha, int beta, int depth, boolean isMaximizingPlayer) {
+	public static int alphaBetaIterativeDeepening(GameBoard board, int alpha, int beta, int depth, boolean isMaximizingPlayer, boolean a) {
 		
-		if (depth == 0) return evaluatePosition(board);
+		//evaluatePosition(board);
+		if (depth == 0) {
+			
+			if (a) return quiescenceSearch(board, alpha, beta, isMaximizingPlayer);
+			else return evaluatePosition(board);
+		}
 		List<Move> movesList = Move.GenerateLegalMoves(board);
+		if(movesList.isEmpty()) return evaluatePosition(board);
 		Move bestMove = null;
 		boolean isCheckmate = false;
 
@@ -331,12 +350,11 @@ public class Evaluation {
 		if (bestMove != null) {
 			
 			int index = movesList.indexOf(bestMove);
-			if (index != -1) {
-				Move temp = movesList.get(0);
-				movesList.set(0, bestMove);
-				movesList.set(index, temp);
-			}
+			if (index != -1) movesList.get(index).setMoveScore(Evaluation.MATE_SCORE);
+			
 		}
+		
+		Collections.sort(movesList, Collections.reverseOrder());
 		if (isMaximizingPlayer) {
 			
 			for (int i = 0; i < movesList.size(); i++) {
@@ -357,7 +375,7 @@ public class Evaluation {
 						
 				}
 			
-				int evaluation = alphaBetaIterativeDeepening(board, alpha, beta, depth - 1, !isMaximizingPlayer);
+				int evaluation = alphaBetaIterativeDeepening(board, alpha, beta, depth - 1, !isMaximizingPlayer, a);
 				board.undoMove();
 				
 				if (evaluation >= beta) {
@@ -394,7 +412,7 @@ public class Evaluation {
 						
 				}
 	
-				int evaluation = alphaBetaIterativeDeepening(board, alpha, beta, depth - 1, !isMaximizingPlayer);
+				int evaluation = alphaBetaIterativeDeepening(board, alpha, beta, depth - 1, !isMaximizingPlayer, a);
 				board.undoMove();
 				if (evaluation <= alpha) {
 					return alpha;
@@ -413,14 +431,104 @@ public class Evaluation {
 		
 	}
 	
-	public static void iterativeDeepening(GameBoard board, int depthMax) {
+	public static int quiescenceSearch(GameBoard board, int alpha, int beta, boolean isMaximizingPlayer) {
 		
+		int standPat = evaluatePosition(board);
+		List<Move> movesList = Move.GenerateLegalCaptureMoves(board);
+		//printMoves(movesList);
+		Collections.sort(movesList, Collections.reverseOrder());
+		//printMoves(movesList);
+
+		if (isMaximizingPlayer) {
+			
+			if (standPat >= beta) return beta;
+			if (standPat > alpha) alpha = standPat;
+			
+			for (int i = 0; i < movesList.size(); i++) {
+				
+				int lastIndexI = movesList.get(i).getPiece().getSquare().getI();
+				int lastIndexJ = movesList.get(i).getPiece().getSquare().getJ();
+				int toIndexI = movesList.get(i).getToIndexI();
+				int toIndexJ = movesList.get(i).getToIndexJ();
+				char promotionPiece = movesList.get(i).getPromotionPiece();
+					
+				if (movesList.get(i).getPiece().pieceType().equals("PAWN")) {
+						
+					movesList.get(i).getPiece().makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false, promotionPiece);
+						
+				} else {
+						
+					movesList.get(i).getPiece().makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false);
+						
+				}
+			
+				int evaluation = quiescenceSearch(board, alpha, beta, !isMaximizingPlayer);
+				board.undoMove();
+				
+				if (evaluation >= beta) return beta;
+				if (evaluation > alpha) alpha = evaluation;
+			}
+			return alpha;		
+		} else {
+			
+			if (standPat <= alpha) return alpha;
+			if (standPat < beta) beta = standPat;
+			
+			for (int i = 0; i < movesList.size(); i++) {
+				
+				int lastIndexI = movesList.get(i).getPiece().getSquare().getI();
+				int lastIndexJ = movesList.get(i).getPiece().getSquare().getJ();
+				int toIndexI = movesList.get(i).getToIndexI();
+				int toIndexJ = movesList.get(i).getToIndexJ();
+				char promotionPiece = movesList.get(i).getPromotionPiece();
+					
+				if (movesList.get(i).getPiece().pieceType().equals("PAWN")) {
+						
+					movesList.get(i).getPiece().makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false, promotionPiece);
+						
+				} else {
+						
+					movesList.get(i).getPiece().makeMove(lastIndexI, lastIndexJ, toIndexI, toIndexJ, board, false);
+						
+				}
+	
+				int evaluation = quiescenceSearch(board, alpha, beta, !isMaximizingPlayer);
+				board.undoMove();
+				
+				if (evaluation <= alpha) return alpha;
+				
+				if (evaluation < beta) beta = evaluation;
+	
+			}
+			return beta;
+		}
+	}
+	public static void iterativeDeepening(GameBoard board, int depthMax, boolean a) {
+		
+		int evaluation;
+		int alpha = -Evaluation.INFINITE;
+		int beta = Evaluation.INFINITE;
+		int delta = 21;
 		for (int depth = 1; depth < depthMax; depth++) {
 			
-			alphaBetaIterativeDeepening(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, board.isWhiteToMove());
+			evaluation = alphaBetaIterativeDeepening(board, alpha, beta, depth, board.isWhiteToMove(), a);
+			if (evaluation == alpha) {
+				delta += (delta / 4) + 5;
+				alpha -= delta;
+				depth--;
+				continue;
+			} else if (evaluation == beta) {
+				delta += (delta / 4) + 5;
+				beta += delta;
+				depth--;
+				continue;
+			}
+			delta = (Math.abs(evaluation) / 256) + 21;
+			alpha = Math.max(evaluation - delta, -Evaluation.INFINITE);
+			beta = Math.min(evaluation + delta, Evaluation.INFINITE);
 			Move bestMove = board.getTranspositionTable().get(board.getPositionHash()).bestMove;
 			System.out.println(bestMove.getPiece().getSquare().getI() + " " + bestMove.getPiece().getSquare().getJ() + " " + 
-					bestMove.getToIndexI() + " " + bestMove.getToIndexJ() + " " + bestMove.getPromotionPiece());
+					bestMove.getToIndexI() + " " + bestMove.getToIndexJ() + " " + bestMove.getPromotionPiece() + " " + evaluation);
 			if (board.getTranspositionTable().get(board.getPositionHash()).isCheckmate) break;
 			
 		}
@@ -429,8 +537,11 @@ public class Evaluation {
 	public static int evaluatePosition(GameBoard board) {
 	
 		if (isCheckmate(board)) return (!board.isWhiteToMove()) ? MATE_SCORE : -MATE_SCORE;
-		return materialEvaluation(board);
 		
+		int evaluation = materialEvaluation(board);
+		evaluation += mobilityEvaluation(board);
+		
+		return evaluation;
 	}
 
 
@@ -466,6 +577,12 @@ public class Evaluation {
 		}
 		
 		return nodes;
+	}
+	
+	// Most Valuable Victim, Least Valuable Attacker
+	public static int mvvLva(Pieces victim, Pieces attacker) {
+		
+		return victim.pieceValue() + 11 - attacker.hashIndex();
 	}
 	
 	private static int materialEvaluation(GameBoard board) {
@@ -512,6 +629,311 @@ public class Evaluation {
 		
 	}
 	
+	private static int mobilityEvaluation(GameBoard board) {
+		
+		// Missing King Blockers
+		boolean[][] mobilityArea = new boolean[8][8];
+		int whiteMobilityScore, blackMobilityScore, totalMobilityScore;
+		whiteMobilityScore = blackMobilityScore = totalMobilityScore = 0;
+		
+		initializeWhiteMobilityArea(board, mobilityArea);
+		
+		for (Pieces whitePiece : board.getWhitePieces()) {
+			
+			// Might not to adjust what the constitutes the attack squares
+			if (whitePiece.pieceType().equals("KNIGHT")) whiteMobilityScore += knightMobilityScore(whitePiece, mobilityArea);
+			if (whitePiece.pieceType().equals("BISHOP")) whiteMobilityScore += bishopMobilityScore(whitePiece, mobilityArea, board);
+			if (whitePiece.pieceType().equals("ROOK")) whiteMobilityScore += rookMobilityScore(whitePiece, mobilityArea, board);
+			if (whitePiece.pieceType().equals("QUEEN")) whiteMobilityScore += queenMobilityScore(whitePiece, mobilityArea, board);
+			
+		}
+		
+		mobilityArea = new boolean[8][8];
+		initializeBlackMobilityArea(board, mobilityArea);
+		
+		for (Pieces blackPiece : board.getBlackPieces()) {
+			
+			// Might not to adjust what the constitutes the attack squares
+			if (blackPiece.pieceType().equals("KNIGHT")) blackMobilityScore += knightMobilityScore(blackPiece, mobilityArea);
+			if (blackPiece.pieceType().equals("BISHOP")) blackMobilityScore += bishopMobilityScore(blackPiece, mobilityArea, board);
+			if (blackPiece.pieceType().equals("ROOK")) blackMobilityScore += rookMobilityScore(blackPiece, mobilityArea, board);
+			if (blackPiece.pieceType().equals("QUEEN")) blackMobilityScore += queenMobilityScore(blackPiece, mobilityArea, board);
+			
+		}
+		
+		totalMobilityScore = whiteMobilityScore - blackMobilityScore;
+		return totalMobilityScore;
+	}
+
+	private static void initializeWhiteMobilityArea(GameBoard board, boolean[][] mobilityArea) {
+		
+		for (Pieces whitePiece : board.getWhitePieces()) {
+			
+			int i = whitePiece.getSquare().getI();
+			int j = whitePiece.getSquare().getJ();
+			
+			if (whitePiece.pieceType().equals("PAWN")) {
+				if ((i == 6) || (i == 5)) mobilityArea[i][j] = true;
+				else if (board.getBoard()[i - 1][j] != null) mobilityArea[i][j] = true;
+			}
+			if (whitePiece.pieceType().equals("QUEEN")) mobilityArea[i][j] = true;
+			if (whitePiece.pieceType().equals("KING")) mobilityArea[i][j] = true;
+			
+		}
+		
+		for (Pieces blackPiece : board.getBlackPieces()) {
+			
+			int i = blackPiece.getSquare().getI() + 1;
+			int j = blackPiece.getSquare().getJ();
+			
+			if (blackPiece.pieceType().equals("PAWN")) {
+				
+				int jLeft = j - 1;
+				int jRight = j + 1;
+				
+				if ((i >= 0) && (i <= 7) && (jLeft >= 0) && (jLeft <= 7)) mobilityArea[i][jLeft] = true;
+				if ((i >= 0) && (i <= 7) && (jRight >= 0) && (jRight <= 7)) mobilityArea[i][jRight] = true;
+			}
+			
+		}
+	}
+	
+	private static void initializeBlackMobilityArea(GameBoard board, boolean[][] mobilityArea) {
+		
+		for (Pieces blackPiece : board.getBlackPieces()) {
+			
+			int i = blackPiece.getSquare().getI();
+			int j = blackPiece.getSquare().getJ();
+			
+			if (blackPiece.pieceType().equals("PAWN")) {
+				if ((i == 1) || (i == 2)) mobilityArea[i][j] = true;
+				else if (board.getBoard()[i + 1][j] != null) mobilityArea[i][j] = true;
+			}
+			if (blackPiece.pieceType().equals("QUEEN")) mobilityArea[i][j] = true;
+			if (blackPiece.pieceType().equals("KING")) mobilityArea[i][j] = true;
+			
+		}
+		
+		for (Pieces whitePiece : board.getWhitePieces()) {
+			
+			int i = whitePiece.getSquare().getI() - 1;
+			int j = whitePiece.getSquare().getJ();
+			
+			if (whitePiece.pieceType().equals("PAWN")) {
+				
+				int jLeft = j - 1;
+				int jRight = j + 1;
+				
+				if ((i >= 0) && (i <= 7) && (jLeft >= 0) && (jLeft <= 7)) mobilityArea[i][jLeft] = true;
+				if ((i >= 0) && (i <= 7) && (jRight >= 0) && (jRight <= 7)) mobilityArea[i][jRight] = true;
+			}
+			
+		}
+	}
+	
+	private static int knightMobilityScore(Pieces knight, boolean[][] mobilityArea) {
+		
+		int[] movementsI = {-2, -2, -1, 1, 2, 2, 1, -1};
+		int[] movementsJ = {-1, 1, 2, 2, 1, -1, -2, -2};
+		int amountOfMobility = 0;
+		
+		for (int k = 0; k < movementsI.length; k++) {
+			
+			int i = knight.getSquare().getI() + movementsI[k];
+			int j = knight.getSquare().getJ() + movementsJ[k];
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			if (!mobilityArea[i][j]) amountOfMobility++;
+			
+		}
+		
+		int pieceIndex = (knight.getColour() == true) ? knight.hashIndex() - 1 : knight.hashIndex() - 7;
+		return Evaluation.MOBILITY_SCORE[pieceIndex][amountOfMobility];
+		
+	}
+	
+	private static int bishopMobilityScore(Pieces bishop, boolean[][] mobilityArea, GameBoard board) {
+		
+		int amountOfMobility = bishopMobility(bishop, mobilityArea, board, true);
+		
+		int pieceIndex = (bishop.getColour() == true) ? bishop.hashIndex() - 1 : bishop.hashIndex() - 7;
+		return Evaluation.MOBILITY_SCORE[pieceIndex][amountOfMobility];
+		
+	}
+	
+	private static int rookMobilityScore(Pieces rook, boolean[][] mobilityArea, GameBoard board) {
+		
+		int amountOfMobility = rookMobility(rook, mobilityArea, board, true);
+		
+		int pieceIndex = (rook.getColour() == true) ? rook.hashIndex() - 1 : rook.hashIndex() - 7;
+		return Evaluation.MOBILITY_SCORE[pieceIndex][amountOfMobility];
+		
+	}
+	
+	private static int queenMobilityScore(Pieces queen, boolean[][] mobilityArea, GameBoard board) {
+		
+		int amountOfMobility = bishopMobility(queen, mobilityArea, board, false) + rookMobility(queen, mobilityArea, board, false);
+		
+		int pieceIndex = (queen.getColour() == true) ? queen.hashIndex() - 1 : queen.hashIndex() - 7;
+		return Evaluation.MOBILITY_SCORE[pieceIndex][amountOfMobility];
+		
+	}
+	
+	//Should consider x-ray attacks
+	private static int bishopMobility(Pieces bishop, boolean[][] mobilityArea, GameBoard board, boolean includeXRayAttacks) {
+		
+		int lengthOfBoard = 8; //Should be its own class (final int)
+		int xRayBlocker = 0;
+		int amountOfMobility = 0;
+		int xRayBlockerThreshold = (includeXRayAttacks) ? 2 : 1;
+		
+		//Bottom-Right to Top-Left
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = bishop.getSquare().getI() - k;
+			int j = bishop.getSquare().getJ() - k;
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (board.getBoard()[i][j] != null) xRayBlocker++;
+			if (xRayBlocker <= xRayBlockerThreshold) {
+				if (!mobilityArea[i][j]) amountOfMobility++;
+				if (xRayBlocker == xRayBlockerThreshold) break;
+			}
+		}
+		
+		xRayBlocker = 0;
+		
+		//Top-Left to Bottom-Right
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = bishop.getSquare().getI() + k;
+			int j = bishop.getSquare().getJ() + k;
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (board.getBoard()[i][j] != null) xRayBlocker++;
+			if (xRayBlocker <= xRayBlockerThreshold) {
+				if (!mobilityArea[i][j]) amountOfMobility++;
+				if (xRayBlocker == xRayBlockerThreshold) break;
+			}
+		}
+		
+		xRayBlocker = 0;
+		
+		//Bottom-Left to Top-Right
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = bishop.getSquare().getI() - k;
+			int j = bishop.getSquare().getJ() + k;
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (board.getBoard()[i][j] != null) xRayBlocker++;
+			if (xRayBlocker <= xRayBlockerThreshold) {
+				if (!mobilityArea[i][j]) amountOfMobility++;
+				if (xRayBlocker == xRayBlockerThreshold) break;
+			}
+		}
+		
+		xRayBlocker = 0;
+		
+		//Top-Right to Bottom-Left
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = bishop.getSquare().getI() + k;
+			int j = bishop.getSquare().getJ() - k;
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (board.getBoard()[i][j] != null) xRayBlocker++;
+			if (xRayBlocker <= xRayBlockerThreshold) {
+				if (!mobilityArea[i][j]) amountOfMobility++;
+				if (xRayBlocker == xRayBlockerThreshold) break;
+			}
+		}
+		
+		return amountOfMobility;
+		
+	}
+	
+	//Should consider x-ray attacks
+	private static int rookMobility(Pieces rook, boolean[][] mobilityArea, GameBoard board, boolean includeXRayAttacks) {
+		
+		int lengthOfBoard = 8; //Should be its own class (final int)
+		int xRayBlocker = 0;
+		int amountOfMobility = 0;
+		int xRayBlockerThreshold = (includeXRayAttacks) ? 2 : 1;
+
+		//Left to Right
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = rook.getSquare().getI();
+			int j = rook.getSquare().getJ() + k;
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (board.getBoard()[i][j] != null) xRayBlocker++;
+			if (xRayBlocker <= xRayBlockerThreshold) {
+				if (!mobilityArea[i][j]) amountOfMobility++;
+				if (xRayBlocker == xRayBlockerThreshold) break;
+			}
+		}
+		
+		xRayBlocker = 0;
+		
+		//Right to Left
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = rook.getSquare().getI();
+			int j = rook.getSquare().getJ() - k;
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (board.getBoard()[i][j] != null) xRayBlocker++;
+			if (xRayBlocker <= xRayBlockerThreshold) {
+				if (!mobilityArea[i][j]) amountOfMobility++;
+				if (xRayBlocker == xRayBlockerThreshold) break;
+			}
+		}
+		
+		xRayBlocker = 0;
+		
+		//Down to Up
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = rook.getSquare().getI() - k;
+			int j = rook.getSquare().getJ();
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (board.getBoard()[i][j] != null) xRayBlocker++;
+			if (xRayBlocker <= xRayBlockerThreshold) {
+				if (!mobilityArea[i][j]) amountOfMobility++;
+				if (xRayBlocker == xRayBlockerThreshold) break;
+			}
+		}
+		
+		xRayBlocker = 0;
+		
+		//Up to Down
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = rook.getSquare().getI() + k;
+			int j = rook.getSquare().getJ();
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (board.getBoard()[i][j] != null) xRayBlocker++;
+			if (xRayBlocker <= xRayBlockerThreshold) {
+				if (!mobilityArea[i][j]) amountOfMobility++;
+				if (xRayBlocker == xRayBlockerThreshold) break;
+			}
+		}
+		
+		return amountOfMobility;
+	}
+	
 	private static boolean isCheckmate(GameBoard board) {
 		
 		boolean result = false;
@@ -533,9 +955,25 @@ public class Evaluation {
 		return result;
 	}
 	
+	private static void printMoves(List<Move> movesList) {
+		
+		for (Move move: movesList) {
+			
+			int lastIndexI = move.getPiece().getSquare().getI();
+			int lastIndexJ = move.getPiece().getSquare().getJ();
+			int toIndexI = move.getToIndexI();
+			int toIndexJ = move.getToIndexJ();
+			char promotionPiece = move.getPromotionPiece();
+			System.out.println(lastIndexI + " " + lastIndexJ + " " + toIndexI + " " + toIndexJ + " " + promotionPiece);
+			
+		}
+		System.out.println("\n");
+	}
+	
 	public static void main(String[] args) {
-		//7K/P1p1p1p1/2P1P1Pk/6pP/3p2P1/1P6/3P4/8 w - - 0 1
-		GameBoard b = new GameBoard("r5k1/pR4pp/2p1b3/8/r4p2/2K2P2/5P1P/8 b - - 0 5");
+		//r1bqk1nr/1p1pb2p/p1n1p3/2p1Pp2/3P4/2N1BN2/PPP2PPP/R3KB1R w KQkq - 2 9
+		//q2k2q1/2nqn2b/1n1P1n1b/2rnr2Q/1NQ1QN1Q/3Q3B/2RQR2B/Q2K2Q1 w - -
+		GameBoard b = new GameBoard("3k2r1/3P4/5p1p/5P1P/P7/6q1/7K/1R1R4 w - - 0 42");
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(6, b)));
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(miniMax(b, 6, b.isWhiteToMove())));
 		Instant start = Instant.now();
@@ -544,12 +982,12 @@ public class Evaluation {
 		long timeElapsed = Duration.between(start, finish).toSeconds();
 		System.out.println("Algorithm took " + timeElapsed + " seconds.\n");
 		start = Instant.now();
-		iterativeDeepening(b, 50);
+		iterativeDeepening(b, 50, true);
 		finish = Instant.now();
 		timeElapsed = Duration.between(start, finish).toSeconds();
 		System.out.println("Algorithm took " + timeElapsed + " seconds.\n");
-		
-		GameBoard c = new GameBoard("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
+		//White non quiescence
+		GameBoard c = new GameBoard("4r3/pk3p2/3R3p/4nP2/7q/8/P6K/2Q5 w - - 0 40");
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(Perft(5, c)));
 		//System.out.println(NumberFormat.getNumberInstance(Locale.US).format(miniMax(c, 5, c.isWhiteToMove())));
 		

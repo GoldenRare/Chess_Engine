@@ -12,12 +12,13 @@ import java.util.Locale;
 import board.GameBoard;
 import pieces.Pieces;
 
-public class Move {
+public class Move implements Comparable<Move> {
 
 	private Pieces piece;
 	private int toIndexI;
 	private int toIndexJ;
 	private char promotionPiece;
+	private int moveScore;
 	
 	public Move(Pieces piece, int toIndexI, int toIndexJ) {
 		
@@ -27,10 +28,17 @@ public class Move {
 	
 	public Move(Pieces piece, int toIndexI, int toIndexJ, char promotionPiece) {
 		
+		this(piece, toIndexI, toIndexJ, promotionPiece, 0);
+		
+	}
+	
+	public Move(Pieces piece, int toIndexI, int toIndexJ, char promotionPiece, int moveScore) {
+		
 		this.piece = piece;
 		this.toIndexI = toIndexI;
 		this.toIndexJ = toIndexJ;
 		this.promotionPiece = promotionPiece;
+		this.moveScore = moveScore;
 		
 	}
 	
@@ -77,6 +85,49 @@ public class Move {
 		
 	}
 	
+	public static List<Move> GenerateLegalCaptureMoves(GameBoard board) {
+		
+		List<Move> movesList = new ArrayList<Move>();
+		List<Pieces> whitePieces = new ArrayList<Pieces>(board.getWhitePieces());
+		List<Pieces> blackPieces = new ArrayList<Pieces>(board.getBlackPieces());
+		
+		if (board.isWhiteToMove()) {
+			
+			for (Pieces whitePiece : whitePieces) {
+				
+				if (whitePiece.pieceType().equals("PAWN")) GenerateLegalPawnCaptureMoves(movesList, whitePiece, board);
+				if (whitePiece.pieceType().equals("KNIGHT")) GenerateLegalKnightCaptureMoves(movesList, whitePiece, board);
+				if (whitePiece.pieceType().equals("BISHOP")) GenerateLegalDiagonalCaptureMoves(movesList, whitePiece, board);
+				if (whitePiece.pieceType().equals("ROOK")) GenerateLegalHorizontalVerticalCaptureMoves(movesList, whitePiece, board);
+				if (whitePiece.pieceType().equals("QUEEN")) {
+					
+					GenerateLegalDiagonalCaptureMoves(movesList, whitePiece, board);
+					GenerateLegalHorizontalVerticalCaptureMoves(movesList, whitePiece, board);
+				}
+				if (whitePiece.pieceType().equals("KING")) GenerateLegalKingCaptureMoves(movesList, whitePiece, board);
+			}
+		} else {
+			
+			for (Pieces blackPiece : blackPieces) {
+	
+				if (blackPiece.pieceType().equals("PAWN")) GenerateLegalPawnCaptureMoves(movesList, blackPiece, board);
+				if (blackPiece.pieceType().equals("KNIGHT")) GenerateLegalKnightCaptureMoves(movesList, blackPiece, board);
+				if (blackPiece.pieceType().equals("BISHOP")) GenerateLegalDiagonalCaptureMoves(movesList, blackPiece, board);
+				if (blackPiece.pieceType().equals("ROOK")) GenerateLegalHorizontalVerticalCaptureMoves(movesList, blackPiece, board);
+				if (blackPiece.pieceType().equals("QUEEN")) {
+					
+					GenerateLegalDiagonalCaptureMoves(movesList, blackPiece, board);
+					GenerateLegalHorizontalVerticalCaptureMoves(movesList, blackPiece, board);
+					
+				}
+				if (blackPiece.pieceType().equals("KING")) GenerateLegalKingCaptureMoves(movesList, blackPiece, board);
+			}
+		}
+		
+		return movesList;
+		
+	}
+	
 	private static void GenerateLegalPawnMoves(List<Move> movesList, Pieces piece, GameBoard board) {
 		
 		if (piece.getColour() == true) {
@@ -114,15 +165,18 @@ public class Move {
 					piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, board, false, 'Q')) {
 				
 				board.undoMove();
+				Pieces victim = (!enPassantCaptureMove(piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, board)) ? board.getBoard()[piece.getSquare().getI() - 1][piece.getSquare().getJ() - 1] : 
+					board.getBoard()[piece.getSquare().getI()][piece.getSquare().getJ() - 1] ;
+				int moveScore = Evaluation.mvvLva(victim, piece);
 				if (piece.getSquare().getI() - 1 == 0) {
 					
-					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'Q'));
-					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'R'));
-					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'B'));
-					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'N'));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'Q', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'R', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'B', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'N', moveScore));
 					
 				} else {
-					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, ' ', moveScore));
 				}
 				
 				
@@ -132,15 +186,18 @@ public class Move {
 					piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, board, false, 'Q')) {
 				
 				board.undoMove();
+				Pieces victim = (!enPassantCaptureMove(piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, board)) ? board.getBoard()[piece.getSquare().getI() - 1][piece.getSquare().getJ() + 1] : 
+					board.getBoard()[piece.getSquare().getI()][piece.getSquare().getJ() + 1] ;
+				int moveScore = Evaluation.mvvLva(victim, piece);
 				if (piece.getSquare().getI() - 1 == 0) {
 					
-					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'Q'));
-					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'R'));
-					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'B'));
-					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'N'));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'Q', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'R', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'B', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'N', moveScore));
 					
 				} else {
-					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, ' ', moveScore));
 				}
 				
 				
@@ -177,15 +234,18 @@ public class Move {
 					piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, board, false, 'q')) {
 				
 				board.undoMove();
+				Pieces victim = (!enPassantCaptureMove(piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, board)) ? board.getBoard()[piece.getSquare().getI() + 1][piece.getSquare().getJ() - 1] : 
+					board.getBoard()[piece.getSquare().getI()][piece.getSquare().getJ() - 1] ;
+				int moveScore = Evaluation.mvvLva(victim, piece);
 				if (piece.getSquare().getI() + 1 == 7) {
 					
-					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'q'));
-					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'r'));
-					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'b'));
-					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'n'));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'q', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'r', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'b', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'n', moveScore));
 					
 				} else {
-					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, ' ', moveScore));
 				}
 				
 				
@@ -195,15 +255,108 @@ public class Move {
 					piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, board, false, 'q')) {
 				
 				board.undoMove();
+				Pieces victim = (!enPassantCaptureMove(piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, board)) ? board.getBoard()[piece.getSquare().getI() + 1][piece.getSquare().getJ() + 1] : 
+					board.getBoard()[piece.getSquare().getI()][piece.getSquare().getJ() + 1] ;
+				int moveScore = Evaluation.mvvLva(victim, piece);
 				if (piece.getSquare().getI() + 1 == 7) {
 					
-					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'q'));
-					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'r'));
-					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'b'));
-					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'n'));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'q', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'r', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'b', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'n', moveScore));
 					
 				} else {
-					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, ' ', moveScore));
+				}
+				
+				
+			}
+		}
+	}
+	
+	private static void GenerateLegalPawnCaptureMoves(List<Move> movesList, Pieces piece, GameBoard board) {
+		
+		if (piece.getColour() == true) {
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), 
+					piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, board, false, 'Q')) {
+				
+				board.undoMove();
+				Pieces victim = (!enPassantCaptureMove(piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, board)) ? board.getBoard()[piece.getSquare().getI() - 1][piece.getSquare().getJ() - 1] : 
+					board.getBoard()[piece.getSquare().getI()][piece.getSquare().getJ() - 1] ;
+				int moveScore = Evaluation.mvvLva(victim, piece);
+				if (piece.getSquare().getI() - 1 == 0) {
+					
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'Q', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'R', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'B', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, 'N', moveScore));
+					
+				} else {
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() - 1, ' ', moveScore));
+				}
+				
+				
+			}
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), 
+					piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, board, false, 'Q')) {
+				
+				board.undoMove();
+				Pieces victim = (!enPassantCaptureMove(piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, board)) ? board.getBoard()[piece.getSquare().getI() - 1][piece.getSquare().getJ() + 1] : 
+					board.getBoard()[piece.getSquare().getI()][piece.getSquare().getJ() + 1];
+				int moveScore = Evaluation.mvvLva(victim, piece);
+				if (piece.getSquare().getI() - 1 == 0) {
+					
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'Q', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'R', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'B', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, 'N', moveScore));
+					
+				} else {
+					movesList.add(new Move(piece, piece.getSquare().getI() - 1, piece.getSquare().getJ() + 1, ' ', moveScore));
+				}	
+			}
+		} else {
+			
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), 
+					piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, board, false, 'q')) {
+				
+				board.undoMove();
+				Pieces victim = (!enPassantCaptureMove(piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, board)) ? board.getBoard()[piece.getSquare().getI() + 1][piece.getSquare().getJ() - 1] : 
+					board.getBoard()[piece.getSquare().getI()][piece.getSquare().getJ() - 1] ;
+				int moveScore = Evaluation.mvvLva(victim, piece);
+				if (piece.getSquare().getI() + 1 == 7) {
+					
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'q', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'r', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'b', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, 'n', moveScore));
+					
+				} else {
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() - 1, ' ', moveScore));
+				}
+				
+				
+			}
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), 
+					piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, board, false, 'q')) {
+				
+				board.undoMove();
+				Pieces victim = (!enPassantCaptureMove(piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, board)) ? board.getBoard()[piece.getSquare().getI() + 1][piece.getSquare().getJ() + 1] : 
+					board.getBoard()[piece.getSquare().getI()][piece.getSquare().getJ() + 1];
+				int moveScore = Evaluation.mvvLva(victim, piece);
+				if (piece.getSquare().getI() + 1 == 7) {
+					
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'q', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'r', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'b', moveScore));
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, 'n', moveScore));
+					
+				} else {
+					movesList.add(new Move(piece, piece.getSquare().getI() + 1, piece.getSquare().getJ() + 1, ' ', moveScore));
 				}
 				
 				
@@ -226,7 +379,42 @@ public class Move {
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, i, j));
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				else movesList.add(new Move(piece, i, j));
+				
+			}
+		}
+		
+	}
+	
+	private static void GenerateLegalKnightCaptureMoves(List<Move> movesList, Pieces piece, GameBoard board) {
+		
+		int[] movementsI = {-2, -2, -1, 1, 2, 2, 1, -1};
+		int[] movementsJ = {-1, 1, 2, 2, 1, -1, -2, -2};
+		
+		for (int k = 0; k < movementsI.length; k++) {
+			
+			int i = piece.getSquare().getI() + movementsI[k];
+			int j = piece.getSquare().getJ() + movementsJ[k];
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
+				
+				board.undoMove();
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
 				
 			}
 		}
@@ -248,7 +436,14 @@ public class Move {
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, i, j));
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				else movesList.add(new Move(piece, i, j));
 				
 			} else {
 				
@@ -268,7 +463,14 @@ public class Move {
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, i, j));
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				else movesList.add(new Move(piece, i, j));
 				
 			} else {
 				
@@ -288,7 +490,14 @@ public class Move {
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, i, j));
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				else movesList.add(new Move(piece, i, j));
 				
 			} else {
 				
@@ -308,7 +517,122 @@ public class Move {
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, i, j));
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				else movesList.add(new Move(piece, i, j));
+				
+			} else {
+				
+				//break;
+				
+			}
+		}	
+	}
+	
+	// Can make unnecessary moves
+	private static void GenerateLegalDiagonalCaptureMoves(List<Move> movesList, Pieces piece, GameBoard board) {
+		
+		int lengthOfBoard = 8; //Should be its own class (final int)
+		
+		//Bottom-Right to Top-Left
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = piece.getSquare().getI() - k;
+			int j = piece.getSquare().getJ() - k;
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
+				
+				board.undoMove();
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				
+			} else {
+				
+				//break;
+				
+			}
+		}
+		
+		//Top-Left to Bottom-Right
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = piece.getSquare().getI() + k;
+			int j = piece.getSquare().getJ() + k;
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
+				
+				board.undoMove();
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+				}
+				
+			} else {
+				
+				//break;
+				
+			}
+		}
+		
+		//Bottom-Left to Top-Right
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = piece.getSquare().getI() - k;
+			int j = piece.getSquare().getJ() + k;
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
+				
+				board.undoMove();
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+				}
+				
+			} else {
+				
+				//break;
+				
+			}
+		}
+		
+		//Top-Right to Bottom-Left
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = piece.getSquare().getI() + k;
+			int j = piece.getSquare().getJ() - k;
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
+				
+				board.undoMove();
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
 				
 			} else {
 				
@@ -333,7 +657,14 @@ public class Move {
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, i, j));
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				else movesList.add(new Move(piece, i, j));
 				
 			} else {
 				
@@ -353,7 +684,14 @@ public class Move {
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, i, j));
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				else movesList.add(new Move(piece, i, j));
 				
 			} else {
 				
@@ -373,7 +711,14 @@ public class Move {
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, i, j));
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				else movesList.add(new Move(piece, i, j));
 				
 			} else {
 				
@@ -393,7 +738,14 @@ public class Move {
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, i, j));
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				else movesList.add(new Move(piece, i, j));
 				
 			} else {
 				
@@ -405,7 +757,117 @@ public class Move {
 		
 	}
 	
-	// NEED TO INCLUDE CASTLING MOVEMENTS
+	// Can make unnecessary moves
+	private static void GenerateLegalHorizontalVerticalCaptureMoves(List<Move> movesList, Pieces piece, GameBoard board) {
+		
+		int lengthOfBoard = 8; //Should be its own class (final int)
+
+		//Left to Right
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = piece.getSquare().getI();
+			int j = piece.getSquare().getJ() + k;
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
+				
+				board.undoMove();
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				
+			} else {
+				
+				//break;
+				
+			}
+		}
+		
+		//Right to Left
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = piece.getSquare().getI();
+			int j = piece.getSquare().getJ() - k;
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
+				
+				board.undoMove();
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				
+			} else {
+				
+				//break;
+				
+			}
+		}
+		
+		//Down to Up
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = piece.getSquare().getI() - k;
+			int j = piece.getSquare().getJ();
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
+				
+				board.undoMove();
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+				}
+				
+			} else {
+				
+				//break;
+				
+			}
+		}
+		
+		//Up to Down
+		for (int k = 1; k < lengthOfBoard; k++) {
+			
+			int i = piece.getSquare().getI() + k;
+			int j = piece.getSquare().getJ();
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
+				
+				board.undoMove();
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				
+			} else {
+				
+				//break;
+				
+			}
+		}
+		
+		
+	}
+	
 	private static void GenerateLegalKingMoves(List<Move> movesList, Pieces piece, GameBoard board) {
 		
 		int[] movementsI = {-1, -1, -1, 0, 1, 1, 1, 0, 0, 0};
@@ -421,10 +883,54 @@ public class Move {
 			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
 				
 				board.undoMove();
-				movesList.add(new Move(piece, i, j));
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				} else {
+					movesList.add(new Move(piece, i, j));
+				}
 				
 			}
 		}
+	}
+	
+	private static void GenerateLegalKingCaptureMoves(List<Move> movesList, Pieces piece, GameBoard board) {
+		
+		int[] movementsI = {-1, -1, -1, 0, 1, 1, 1, 0};
+		int[] movementsJ = {-1, 0, 1, 1, 1, 0, -1, -1};
+		
+		for (int k = 0; k < movementsI.length; k++) {
+			
+			int i = piece.getSquare().getI() + movementsI[k];
+			int j = piece.getSquare().getJ() + movementsJ[k];
+			
+			if ((i < 0) || (i > 7) || (j < 0) || (j > 7)) continue;
+			
+			if (piece.makeMove(piece.getSquare().getI(), piece.getSquare().getJ(), i, j, board, false)) {
+				
+				board.undoMove();
+				if (board.getBoard()[i][j] != null) {
+					
+					Pieces victim = board.getBoard()[i][j];
+					int moveScore = Evaluation.mvvLva(victim, piece);
+					movesList.add(new Move(piece, i, j, ' ', moveScore));
+					
+				}
+				
+			}
+		}
+	}
+	
+	private static boolean enPassantCaptureMove(int toIndexI, int toIndexJ, GameBoard board) {
+		
+		boolean result = false;
+		
+		if ((toIndexI == board.getEnPassantSquare().getI()) && (toIndexJ == board.getEnPassantSquare().getJ())) result = true;
+		
+		return result;
 	}
 	
 	public static long Perft(int depth, GameBoard board) {
@@ -529,6 +1035,13 @@ public class Move {
 		
 		return true;
 	}
+	
+	@Override
+	public int compareTo(Move other) {
+		
+		return this.moveScore - other.moveScore;
+				
+	}
 
 	public Pieces getPiece() {
 		
@@ -551,6 +1064,18 @@ public class Move {
 	public char getPromotionPiece() {
 		
 		return this.promotionPiece;
+		
+	}
+	
+	public int getMoveScore() {
+		
+		return this.moveScore;
+		
+	}
+	
+	public void setMoveScore(int moveScore) {
+		
+		this.moveScore = moveScore;
 		
 	}
 

@@ -24,46 +24,7 @@ public class GameBoard_GUI implements ActionListener{
 	
 	public GameBoard_GUI() {
 		
-		JFrame f = new JFrame();
-		
-		int x = 100;
-		int y = 100;
-		boolean color = false;
-		
-		
-		for(int i = 0; i < 8; i++) {
-			for(int j = 0; j < 8; j++) {
-				
-				ImageIcon img = new ImageIcon("piece_images/white_pawn.png");
-				//b.setIcon(img);
-				Image scaledImg = img.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT);
-				ImageIcon newImg = new ImageIcon(scaledImg);
-				JButton b = new JButton(newImg);
-				b.addActionListener(this);
-				b.setBounds(x, y, 100, 100);
-				if(color) {
-					
-					b.setBackground(new Color(0, 255, 255));
-					
-				} else {
-					
-					b.setBackground(Color.white);
-					
-				}
-		
-				color = !color;
-				this.squares.add(b);
-				f.add(b);
-				x += 100;
-			}
-			color = !color;
-			x = 100;
-			y += 100;
-		}
-		
-		f.setSize(1000, 1000);
-		f.setLayout(null);
-		f.setVisible(true);
+		this(new GameBoard());
 		
 	}
 	
@@ -128,7 +89,17 @@ public class GameBoard_GUI implements ActionListener{
 			try {
 				
 				//System.out.println(Position.isMyKingInCheck(this.lastIndexI, this.lastIndexJ, toIndexI, toIndexJ, this.board)); // Debugging
-				this.board = this.board.getBoard()[this.lastIndexI][this.lastIndexJ].makeMove(this.lastIndexI, this.lastIndexJ, toIndexI, toIndexJ, this.board, this.squares);
+				
+				if (this.board.getBoard()[this.lastIndexI][this.lastIndexJ].pieceType().equals("PAWN")) {
+					if (this.board.getBoard()[this.lastIndexI][this.lastIndexJ].getColour() == true) {
+						if (this.board.getBoard()[this.lastIndexI][this.lastIndexJ].makeMove(this.lastIndexI, this.lastIndexJ, toIndexI, toIndexJ, this.board, false, 'Q')) updateBoard();
+					} else {
+						if (this.board.getBoard()[this.lastIndexI][this.lastIndexJ].makeMove(this.lastIndexI, this.lastIndexJ, toIndexI, toIndexJ, this.board, false, 'q')) updateBoard();
+					}
+				}
+				else {
+					if (this.board.getBoard()[this.lastIndexI][this.lastIndexJ].makeMove(this.lastIndexI, this.lastIndexJ, toIndexI, toIndexJ, this.board, false)) updateBoard();
+				}
 				
 			} catch (NullPointerException e) {
 				
@@ -150,16 +121,16 @@ public class GameBoard_GUI implements ActionListener{
 		
 	}
 	
-	/*
-	public void updateBoard(Pieces[][] board) {
+	
+	public void updateBoard() {
 		
 		int k = 0;
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				
-				if (this.board[i][j] != null) {
+				if (this.board.getBoard()[i][j] != null) {
 					
-					this.board[i][j].printPiece(this.squares.get(k));
+					this.board.getBoard()[i][j].printPiece(this.squares.get(k));
 					
 				} else {
 					
@@ -170,13 +141,11 @@ public class GameBoard_GUI implements ActionListener{
 		}
 		
 	}
-	*/
+	
 	
 	public static void main(String[] args) {
 		
-		//GameBoard_GUI gameBoard = new GameBoard_GUI();
-		GameBoard b = new GameBoard("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
-		new GameBoard_GUI(b);
+		new GameBoard_GUI();
 		
 	}
 }

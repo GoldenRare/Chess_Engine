@@ -69,9 +69,9 @@ public class Knight extends Pieces {
 			oldBoard.addGameState(new Position(lastIndexI, lastIndexJ, toIndexI, toIndexJ, oldBoard, false, false, false));
 			GameBoard newBoard = oldBoard;
 			newBoard.getBoard()[toIndexI][toIndexJ] = newBoard.getBoard()[lastIndexI][lastIndexJ];
-			printPiece(b.get(toIndexI * 8 + toIndexJ));
+			printPiece(b.get(toIndexI * 8 + toIndexJ)); //
 			newBoard.getBoard()[lastIndexI][lastIndexJ] = null;
-			b.get(lastIndexI * 8 + lastIndexJ).setIcon(null);
+			b.get(lastIndexI * 8 + lastIndexJ).setIcon(null); //
 			newBoard.setWhiteToMove(!newBoard.isWhiteToMove());
 			newBoard.setEnPassantSquare(-1, -1);
 			this.square.setI(toIndexI);

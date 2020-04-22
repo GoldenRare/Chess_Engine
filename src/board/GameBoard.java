@@ -43,9 +43,7 @@ public class GameBoard {
 	
 	public GameBoard() {
 		
-		startGame();
-		zobristHashing();
-		hashPosition();
+		this("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 		
 	}
 	
@@ -56,7 +54,7 @@ public class GameBoard {
 		hashPosition();
 		
 	}
-	
+	/*
 	private void startGame() {
 		
 		this.board = new Pieces[8][8];
@@ -116,10 +114,10 @@ public class GameBoard {
 		this.previousGameStates = new Stack<Position>();
 		
 	}
-	
+	*/
 	private void parseFen(String fen) {
 		
-		this.board = new Pieces[8][8];
+		this.board = new Pieces[8][8]; // 8 x 8 chess board
 		this.whitePieces = new ArrayList<Pieces>();
 		this.blackPieces = new ArrayList<Pieces>();
 		this.castlingRights = 0b0000;
